@@ -1,38 +1,20 @@
 const pool = require('../src/Infrastructures/database/postgres/pool');
+const AddedThread = require('../src/Domains/threads/entities/AddedThread');
 
 const ThreadsTableTestHelper = {
   async addThread({
-    id = 'thread-123', title = 'dicoding', body = 'body dicoding thread', owner = 'user-1234',
-  }) {
+    id, title, body,
+  }, owner) {
     const createdAt = new Date().toISOString();
     const query = {
-      text: 'INSERT INTO threads VALUES ($1, $2, $3, $4, $5, $5)',
+      text: 'INSERT INTO threads VALUES ($1, $2, $3, $4, $5, $5) RETURNING id, title, owner, created_at',
       values: [id, title, body, owner, createdAt],
     };
 
-    await pool.query(query);
+    const result = await pool.query(query);
+    return new AddedThread(result.rows[0]);
   },
 
-  // async findThreadById(id) {
-  //   const query = {
-  //     text: 'SELECT * FROM threads WHERE id = $1',
-  //     values: [id],
-  //   };
-  //
-  //   const result = await pool.query(query);
-  //   return result.rows;
-  // },
-  //
-  // async getAllThreads(id) {
-  //   const query = {
-  //     text: 'SELECT * FROM threads',
-  //     values: [id],
-  //   };
-  //
-  //   const result = await pool.query(query);
-  //   return result.rows;
-  // },
-  //
   async cleanTable() {
     await pool.query('DELETE FROM threads WHERE 1=1');
   },
