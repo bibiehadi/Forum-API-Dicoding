@@ -4,7 +4,10 @@ class GetDetailThreadUseCase {
   }
 
   async execute(id) {
-    return this._threadRepository.findThreadById(id);
+    const thread = await this._threadRepository.getThreadById(id);
+    const comments = await this._threadRepository.getCommentsByThread(thread.id);
+    thread.comments = comments;
+    return thread;
   }
 }
 

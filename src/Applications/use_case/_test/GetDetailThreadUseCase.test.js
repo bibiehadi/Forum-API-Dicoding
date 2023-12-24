@@ -19,7 +19,8 @@ describe('GetDetailThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
 
     // mocking needed function
-    mockThreadRepository.findThreadById = jest.fn().mockImplementation(() => Promise.resolve(mockDetailThread));
+    mockThreadRepository.getThreadById = jest.fn().mockImplementation(() => Promise.resolve(mockDetailThread));
+    mockThreadRepository.getCommentsByThread = jest.fn().mockImplementation(() => Promise.resolve());
 
     const detailThreadUseCase = new GetDetailThreadUseCase({
       threadRepository: mockThreadRepository,
@@ -31,6 +32,6 @@ describe('GetDetailThreadUseCase', () => {
 
     expect(detailThread).toStrictEqual(new DetailThread(mockDetailThread));
 
-    expect(mockThreadRepository.findThreadById).toBeCalledWith(threadId);
+    expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
   });
 });

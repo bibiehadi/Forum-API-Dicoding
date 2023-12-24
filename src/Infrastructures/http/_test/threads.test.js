@@ -147,10 +147,9 @@ describe('/threads endpoint', () => {
 
       // Assert
       const responseJson = JSON.parse(response.payload);
-      console.log(responseJson);
       expect(response.statusCode).toEqual(200);
       expect(responseJson.status).toEqual('success');
-      expect(responseJson.data.detailThread).toBeDefined();
+      expect(responseJson.data.thread).toBeDefined();
     });
 
     it('should response 400 when request payload not contain needed property', async () => {
@@ -206,4 +205,52 @@ describe('/threads endpoint', () => {
       expect(responseJson.message).toEqual('tidak dapat membuat thread baru karena tipe data tidak sesuai');
     });
   });
+
+  describe('when POST /threads/{threadId}/comments', () => {
+    it('should response 200 and persisted comment', async () => {
+      const server = await createServer(container);
+      const accessToken = await ServerAuthTestHelper.login(userDummy);
+      await UsersTableTestHelper.addUser({ id: 'user-1234', username: 'dicoding' });
+      await ThreadsTableTestHelper.addThread(threadDummy, 'user-1234');
+      const requestPayload = {
+        content: 'this is comment',
+      };
+      const response = await server.inject({
+        method: 'POST',
+        url: `/threads/${threadDummy.id}/comments`,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        payload: requestPayload,
+      });
+
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(201);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.addedComment).toBeDefined();
+    });
+  })
+
+
+  describe('when DELETE /threads/{threadId}/comments/{commentId}', () => {
+    it('should response 200 and persisted comment', async () => {
+      const server = await createServer(container);
+      const accessToken = await ServerAuthTestHelper.login(userDummy);
+      await UsersTableTestHelper.addUser({ id: 'user-1234', username: 'dicoding' });
+      await ThreadsTableTestHelper.addThread(threadDummy, 'user-1234');
+      const comment = await ThreadsTableTestHelper.addComment('this is comment dummy', threadDummy.id, 'user-1234', 'comment-1234');
+      const response = await server.inject({
+        method: 'DELETE',
+        url: `/threads/${threadDummy.id}/comments/${comment.id}`,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const responseJson = JSON.parse(response.payload);
+      expect(response.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
+      expect(responseJson.data.deletedComment).toBeDefined();
+    });
+  })
 });
