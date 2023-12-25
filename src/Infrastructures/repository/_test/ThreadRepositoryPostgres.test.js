@@ -2,9 +2,9 @@ const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 const pool = require('../../database/postgres/pool');
 const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
-const AddThread = require('../../../Domains/threads/entities/AddThread');
-const AddedThread = require('../../../Domains/threads/entities/AddedThread');
-const AddedCommentThread = require('../../../Domains/threads/entities/AddedCommentThread');
+const AddThread = require('../../../Domains/threads/entities/thread/AddThread');
+const AddedThread = require('../../../Domains/threads/entities/thread/AddedThread');
+const AddedCommentThread = require('../../../Domains/threads/entities/comment/AddedCommentThread');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 
 describe('ThreadRepository postgres', () => {
@@ -222,6 +222,166 @@ describe('ThreadRepository postgres', () => {
       };
 
       return expect(threadRepositoryPostgres.findCommentById('comment-1234')).rejects.toThrowError(NotFoundError);
+    });
+  });
+
+  describe('addReplyComment function', () => {
+    it('should add reply comment to database', async () => {
+      await UsersTableTestHelper.addUser({ id: 'user-1234', username: 'dicoding' });
+      await UsersTableTestHelper.addUser({ id: 'user-12345', username: 'dicoding2' });
+
+      const fakeIdGenerator = () => '1234';
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+      const addThread = new AddThread({
+        title: 'dicoding',
+        body: 'dicoding body thread',
+      });
+
+      await threadRepositoryPostgres.addThread(addThread, 'user-1234');
+
+      const comment = {
+        content : 'this is comment' };
+      const addedCommentThread = await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
+
+      const replyComment = {
+        content : 'this is comment' };
+      const addReplyComment = await threadRepositoryPostgres.addReplyComment(comment, 'comment-1234', 'user-12345');
+
+      expect(addedCommentThread).toStrictEqual(new AddedCommentThread({
+        id: 'comment-1234',
+        content: 'this is comment',
+        owner: 'user-1234',
+      }));
+    });
+  });
+
+  describe('getRepliesComment function', () => {
+    it('should return empty array when no comment are found in thread', async () => {
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+
+      const comments = await threadRepositoryPostgres.getRepliesByComment();
+      expect(comments).toEqual([]);
+    });
+
+    it('should return list of comment when replies are found', async () => {
+      await UsersTableTestHelper.addUser({ id: 'user-1234', username: 'dicoding' });
+      await UsersTableTestHelper.addUser({ id: 'user-1235', username: 'dicoding2' });
+      const fakeIdGenerator = () => '1234';
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      const addThread = new AddThread({
+        title: 'dicoding',
+        body: 'dicoding body thread',
+      });
+
+      await threadRepositoryPostgres.addThread(addThread, 'user-1234');
+
+      const comment = {
+        content: 'this is comment'
+      };
+
+      const reply = {
+        content: 'yes that is first comment',
+      }
+
+      const reply2 = {
+        content: 'yes that is second comment',
+      }
+
+      await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234', '1');
+
+      await threadRepositoryPostgres.addReplyComment(reply, 'comment-12341', 'user-1235','1');
+      await threadRepositoryPostgres.addReplyComment(reply2, 'comment-12341', 'user-1234','2');
+
+      const comments = await threadRepositoryPostgres.getRepliesByComment('comment-12341');
+      expect(comments).toHaveLength(2);
+    });
+  });
+
+  describe('deleteReplies function', () => {
+    it('should throw NotFoundError when replies not found', async () => {
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
+
+      return expect(threadRepositoryPostgres.deleteReply('replies-12345')).rejects.toThrowError(NotFoundError);
+    });
+
+    it('should throw AuthorizationError when have not authorization about reply', async () => {
+      await UsersTableTestHelper.addUser({ id: 'user-1234', username: 'dicoding' });
+      await UsersTableTestHelper.addUser({ id: 'user-1235', username: 'dicoding2' });
+
+      const fakeIdGenerator = () => '1234';
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      const addThread = new AddThread({
+        title: 'dicoding',
+        body: 'dicoding body thread',
+      });
+
+      await threadRepositoryPostgres.addThread(addThread, 'user-1234');
+
+      const comment = {
+        content: 'this is comment'
+      };
+      await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
+
+      const reply = {
+        content: 'this is comment reply'
+      };
+      await threadRepositoryPostgres.addReplyComment(comment, 'comment-1234', 'user-1235');
+
+      return expect(threadRepositoryPostgres.verifyReplyOwner('comment-1234', 'user-1234')).rejects.toThrowError(AuthorizationError);
+    });
+
+    it('should update delete status comment reply correctly', async () => {
+      await UsersTableTestHelper.addUser({ id: 'user-1234', username: 'dicoding' });
+      await UsersTableTestHelper.addUser({ id: 'user-1235', username: 'dicoding2' });
+
+      const fakeIdGenerator = () => '1234';
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+      const addThread = new AddThread({
+        title: 'dicoding',
+        body: 'dicoding body thread',
+      });
+
+      await threadRepositoryPostgres.addThread(addThread, 'user-1234');
+
+      const message = {
+        content: 'this is comment'
+      };
+      await threadRepositoryPostgres.addComment(message, 'thread-1234', 'user-1234');
+
+      const content = {
+        content: 'this is comment reply'
+      };
+      const reply = await threadRepositoryPostgres.addReplyComment(content, 'comment-1234', 'user-1235');
+
+      await threadRepositoryPostgres.verifyReplyOwner('reply-1234', 'user-1235');
+
+      const deletedReply = await threadRepositoryPostgres.deleteReply(reply.id, 'comment-1234');
+
+      expect(deletedReply.id).toEqual(deletedReply.id);
+      expect(deletedReply.content).toEqual('**balasan telah dihapus**');
+      expect(deletedReply.owner).toEqual(deletedReply.owner);
+      expect(deletedReply.is_deleted).toEqual(true);
+    });
+
+    it('should update delete status comment when comment not found', async () => {
+      await UsersTableTestHelper.addUser({ id: 'user-1234', username: 'dicoding' });
+
+      const fakeIdGenerator = () => '1234';
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+      const addThread = new AddThread({
+        title: 'dicoding',
+        body: 'dicoding body thread',
+      });
+
+      await threadRepositoryPostgres.addThread(addThread, 'user-1234');
+
+      const message = {
+        content: 'this is comment'
+      };
+
+      return expect(threadRepositoryPostgres.findReplyById('comment-1234')).rejects.toThrowError(NotFoundError);
     });
   });
 });

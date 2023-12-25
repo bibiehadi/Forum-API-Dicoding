@@ -1,7 +1,7 @@
-const AddedCommentThread = require('../../../Domains/threads/entities/AddedCommentThread');
-const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
+const AddedCommentThread = require('../../../../../Domains/threads/entities/comment/AddedCommentThread');
+const ThreadRepository = require('../../../../../Domains/threads/ThreadRepository');
 const AddCommentThreadUsecase = require('../AddCommentThreadUseCase');
-const AddedThread = require('../../../Domains/threads/entities/AddedThread');
+const AddedThread = require('../../../../../Domains/threads/entities/thread/AddedThread');
 
 describe('AddCommentThreadUsecase', () => {
   it('should orchestrating the add comment action correctly', async () => {
@@ -11,12 +11,6 @@ describe('AddCommentThreadUsecase', () => {
 
     const owner = 'user-1234';
     const threadId = 'thread-1234';
-
-     const mockAddedThread = new AddedThread({
-      id: 'thread-1234',
-      title: 'Thread Dicoding',
-      owner,
-    });
 
     const mockAddedComment = new AddedCommentThread({
       id: 'comment-1234',

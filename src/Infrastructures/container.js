@@ -17,19 +17,20 @@ const ThreadRepository = require('../Domains/threads/ThreadRepository');
 const ThreadRepositoryPostgres = require('./repository/ThreadRepositoryPostgres');
 
 // use case
-const AddUserUseCase = require('../Applications/use_case/AddUserUseCase');
+const AddUserUseCase = require('../Applications/use_case/users/AddUserUseCase');
 const AuthenticationTokenManager = require('../Applications/security/AuthenticationTokenManager');
 const JwtTokenManager = require('./security/JwtTokenManager');
-const LoginUserUseCase = require('../Applications/use_case/LoginUserUseCase');
+const LoginUserUseCase = require('../Applications/use_case/users/LoginUserUseCase');
 const AuthenticationRepository = require('../Domains/authentications/AuthenticationRepository');
 const AuthenticationRepositoryPostgres = require('./repository/AuthenticationRepositoryPostgres');
-const LogoutUserUseCase = require('../Applications/use_case/LogoutUserUseCase');
-const RefreshAuthenticationUseCase = require('../Applications/use_case/RefreshAuthenticationUseCase');
-const AddThreadUseCase = require('../Applications/use_case/AddThreadUseCase');
-const GetDetailThreadUseCase = require('../Applications/use_case/GetDetailThreadUseCase');
-const AddCommentThreadUseCase = require('../Applications/use_case/AddCommentThreadUseCase');
-const SafeDeleteCommentUseCase = require('../Applications/use_case/SafeDeleteCommentUseCase');
-
+const LogoutUserUseCase = require('../Applications/use_case/users/LogoutUserUseCase');
+const RefreshAuthenticationUseCase = require('../Applications/use_case/authentications/RefreshAuthenticationUseCase');
+const AddThreadUseCase = require('../Applications/use_case/threads/AddThreadUseCase');
+const GetDetailThreadUseCase = require('../Applications/use_case/threads/GetDetailThreadUseCase');
+const AddCommentThreadUseCase = require('../Applications/use_case/threads/comments/AddCommentThreadUseCase');
+const SafeDeleteCommentUseCase = require('../Applications/use_case/threads/comments/SafeDeleteCommentUseCase');
+const AddReplyCommentUseCase = require('../Applications/use_case/threads/comment_replies/AddReplyCommentUseCase');
+const SafeDeleteReplyUseCase = require('../Applications/use_case/threads/comment_replies/SafeDeleteReplyUseCase');
 // creating container
 const container = createContainer();
 
@@ -220,6 +221,32 @@ container.register([
         {
           name: 'threadRepository',
           internal: ThreadRepository.name,
+        },
+      ],
+    },
+  },
+  {
+    key: AddReplyCommentUseCase.name,
+    Class: AddReplyCommentUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
+        {
+          name: 'threadRepository',
+          internal: ThreadRepository.name
+        },
+      ],
+    },
+  },
+  {
+    key: SafeDeleteReplyUseCase.name,
+    Class: SafeDeleteReplyUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
+        {
+          name: 'threadRepository',
+          internal: ThreadRepository.name
         },
       ],
     },

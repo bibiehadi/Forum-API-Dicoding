@@ -1,10 +1,10 @@
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
-const AddedThread = require('../../Domains/threads/entities/AddedThread');
+const AddedThread = require('../../Domains/threads/entities/thread/AddedThread');
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
-const DetailThread = require('../../Domains/threads/entities/DetailThread');
-const CommentThread = require('../../Domains/threads/entities/CommentThread');
-const AddedComment = require('../../Domains/threads/entities/AddedCommentThread');
+const DetailThread = require('../../Domains/threads/entities/thread/DetailThread');
+const CommentThread = require('../../Domains/threads/entities/comment/CommentThread');
+const AddedComment = require('../../Domains/threads/entities/comment/AddedCommentThread');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -37,7 +37,6 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     if (!result.rowCount) {
       throw new NotFoundError('Thread tidak dapat ditemukan');
     }
-    return true;
   }
 
   async getThreadById(id) {
@@ -74,9 +73,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     };
 
     const result = await this._pool.query(query);
-    if (result.rowCount <= 0) return [];
     return result.rows;
-    // return result.rows.map((comment) => new CommentThread(...comment));
   }
 
   async findCommentById(id) {
@@ -86,8 +83,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     };
 
     const result = await this._pool.query(query);
-    if (!result.rowCount) throw new NotFoundError('Thread tidak dapat ditemukan');
-    // return new CommentThread({ ...result.rows[0] });
+    if (!result.rowCount) throw new NotFoundError('Comment tidak dapat ditemukan');
   }
 
   async verifyCommentOwner(commentId, owner) {
@@ -103,16 +99,92 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async deleteComment(commentId, threadId) {
     const deletedComment = '**komentar telah dihapus**';
+    const updated_at = new Date().toISOString();
     const query = {
-      text: `UPDATE comments SET is_deleted = true, content = $1 
+      text: `UPDATE comments SET is_deleted = true, content = $1, updated_at = $4 
             WHERE thread_id = $2 AND id = $3 
             RETURNING id, content, owner, is_deleted`,
-      values: [deletedComment, threadId, commentId],
+      values: [deletedComment, threadId, commentId, updated_at],
     };
 
     const result = await this._pool.query(query);
     if (!result.rowCount) {
-      throw new NotFoundError('Album update failed, id not found');
+      throw new NotFoundError('Gagal menghapus komen, id tidak ditemukan');
+    }
+    return result.rows[0];
+  }
+
+  async addReplyComment(addReply, commentId, owner, replyId = '') {
+    const { content } = addReply;
+    const id = `reply-${this._idGenerator()}${replyId}`;
+    const createdAt = new Date().toISOString();
+    const query = {
+      text: `INSERT INTO COMMENT_REPLIES VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING id, content, owner`,
+      values: [id, content, owner, commentId, false, createdAt],
+    };
+
+    const result = await this._pool.query(query);
+    return new AddedComment(result.rows[0]);
+  }
+
+  async getRepliesByComment(commentId) {
+    const query = {
+      text: 'SELECT reply.id, reply.content, users.username, reply.created_at AS date FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.comment_id = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows;
+  }
+
+  async getRepliesByThread(threadId) {
+    const query = {
+      text: `SELECT reply.id, reply.content, users.username, reply.created_at AS date, reply.comment_id 
+                FROM comment_replies AS reply 
+                LEFT JOIN users ON reply.owner = users.id
+                LEFT JOIN comments ON reply.comment_id = comments.id
+             WHERE comments.thread_id = $1 ORDER BY reply.created_at ASC`,
+      values: [threadId],
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows;
+  }
+
+  async findReplyById(id) {
+    const query = {
+      text: 'SELECT reply.id, reply.content, users.username, reply.created_at AS date FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.id = $1',
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) throw new NotFoundError('Balasan komentar tidak dapat ditemukan');
+  }
+
+  async verifyReplyOwner(replyId, owner) {
+    const query = {
+      text: 'SELECT * FROM comment_replies WHERE id = $1 AND owner = $2',
+      values: [replyId, owner],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) throw new AuthorizationError('Anda tidak memiliki hak akses terhadap balasan komentar ini');
+    return true;
+  }
+
+  async deleteReply(replyId, commentId) {
+    const deletedComment = '**balasan telah dihapus**';
+    const updated_at = new Date().toISOString();
+    const query = {
+      text: `UPDATE comment_replies SET is_deleted = true, content = $1, updated_at = $4
+            WHERE comment_id = $2 AND id = $3
+            RETURNING id, content, owner, is_deleted`,
+      values: [deletedComment, commentId, replyId, updated_at],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError('Gagal menghapus balasan komentar, id tidak ditemukan');
     }
     return result.rows[0];
   }

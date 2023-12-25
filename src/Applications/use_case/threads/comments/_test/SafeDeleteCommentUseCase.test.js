@@ -1,4 +1,4 @@
-const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
+const ThreadRepository = require('../../../../../Domains/threads/ThreadRepository');
 const SafeDeleteCommentUseCase = require('../SafeDeleteCommentUseCase');
 
 describe('SafeDeleteCommentUsecase', () => {
@@ -8,18 +8,6 @@ describe('SafeDeleteCommentUsecase', () => {
     const owner = 'user-1234';
     const threadId = 'thread-1234';
     const commentId = 'comment-1234';
-
-    // const mockAddedThread = new AddedThread({
-    //     id: 'thread-1234',
-    //     title: 'Thread Dicoding',
-    //     owner,
-    // });
-
-    // const mockAddedComment = new AddedCommentThread({
-    //     id: 'comment-1234',
-    //     content: 'this is comment',
-    //     owner,
-    // });
 
     //  create dependency
     const mockThreadRepository = new ThreadRepository();
@@ -35,7 +23,6 @@ describe('SafeDeleteCommentUsecase', () => {
     });
 
     const deleteComment = await safeDeleteCommentUseCase.execute(commentId, threadId, owner);
-    // expect(deleteComment.is_delete).toStrictEqual(true);
 
     expect(mockThreadRepository.deleteComment).toBeCalledWith(commentId, threadId);
   });
