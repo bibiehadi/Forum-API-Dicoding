@@ -132,7 +132,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getRepliesByThread(threadId) {
     const query = {
-      text: `SELECT reply.id, reply.content, users.username, reply.created_at, comments.thread_id AS date, reply.comment_id, reply.is_deleted 
+      text: `SELECT reply.id, reply.content, users.username, reply.created_at AS date, reply.comment_id, reply.is_deleted 
                 FROM comment_replies AS reply 
                 LEFT JOIN users ON reply.owner = users.id
                 LEFT JOIN comments ON reply.comment_id = comments.id

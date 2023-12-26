@@ -6,6 +6,7 @@ const AddThread = require('../../../Domains/threads/entities/thread/AddThread');
 const AddedThread = require('../../../Domains/threads/entities/thread/AddedThread');
 const AddedCommentThread = require('../../../Domains/threads/entities/comment/AddedCommentThread');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
+const repl = require("repl");
 
 describe('ThreadRepository postgres', () => {
   afterEach(async () => {
@@ -30,16 +31,12 @@ describe('ThreadRepository postgres', () => {
       });
 
       const addedThread = await threadRepositoryPostgres.addThread(addThread, userId);
-
+      expect(addedThread).toHaveProperty('id');
       expect(addedThread).toStrictEqual(new AddedThread({
         id: threadId,
         title: addThread.title,
         owner: userId,
       }));
-
-      expect(addedThread.id).toEqual(threadId);
-      expect(addedThread.title).toEqual(addThread.title);
-      expect(addedThread.owner).toEqual(userId);
     });
   });
 
@@ -92,16 +89,12 @@ describe('ThreadRepository postgres', () => {
       const comment = {
         content : 'this is comment' };
       const addedCommentThread = await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
-
+      expect(addedCommentThread).toHaveProperty('id')
       expect(addedCommentThread).toStrictEqual(new AddedCommentThread({
         id: 'comment-1234',
         content: 'this is comment',
         owner: 'user-1234',
       }));
-
-      expect(addedCommentThread.id).toEqual('comment-1234');
-      expect(addedCommentThread.content).toEqual(comment.content);
-      expect(addedCommentThread.owner).toEqual('user-1234');
     });
   });
 
@@ -126,25 +119,29 @@ describe('ThreadRepository postgres', () => {
 
       await threadRepositoryPostgres.addThread(addThread, 'user-1234');
 
-      const comment = {
+      const content = {
         content: 'this is comment'
       };
-      const comment2 = {
+      const content2 = {
         content: 'this is comment2'
       };
-      await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234', '1');
-
-      await threadRepositoryPostgres.addComment(comment2, 'thread-1234', 'user-1235', '2');
+      const created_at = new Date().getMinutes();
+      const addedComment = await threadRepositoryPostgres.addComment(content, 'thread-1234', 'user-1234', '1');
+      const addedComment2 = await threadRepositoryPostgres.addComment(content2, 'thread-1234', 'user-1235', '2');
 
       const comments = await threadRepositoryPostgres.getCommentsByThread('thread-1234');
       expect(comments).toHaveLength(2);
-      expect(comments[0].id).toEqual('comment-12341');
-      expect(comments[0].content).toEqual(comment.content);
-      expect(comments[0].username).toEqual('dicoding');
+      expect(comments[0].id).toEqual(addedComment.id);
+      expect(comments[0].content).toStrictEqual(addedComment.content);
+      expect(comments[0].username).toStrictEqual('dicoding');
+      expect(new Date(comments[0].date).getMinutes()).toStrictEqual(created_at);
+      expect(comments[0].replies).toStrictEqual([]);
 
-      expect(comments[1].id).toEqual('comment-12342');
-      expect(comments[1].content).toEqual(comment2.content);
-      expect(comments[1].username).toEqual('dicoding2');
+      expect(comments[1].id).toEqual(addedComment2.id);
+      expect(comments[1].content).toStrictEqual(addedComment2.content);
+      expect(comments[1].username).toStrictEqual('dicoding2');
+      expect(new Date(comments[1].date).getMinutes()).toStrictEqual(created_at);
+      expect(comments[1].replies).toStrictEqual([]);
     });
   });
 
@@ -198,7 +195,7 @@ describe('ThreadRepository postgres', () => {
       const deletedComment = await threadRepositoryPostgres.deleteComment('comment-1234', 'thread-1234');
       expect(deletedComment.id).toEqual('comment-1234');
       expect(deletedComment.is_deleted).toBe(true);
-      expect(new Date(deletedComment.date).getMinutes()).toEqual(updated_at);
+      expect(new Date(deletedComment.date).getMinutes()).toBe(updated_at);
     });
 
     it('should update delete status comment correctly with wrong user', async () => {
@@ -257,21 +254,17 @@ describe('ThreadRepository postgres', () => {
 
       const comment = {
         content : 'this is comment' };
-      const addedCommentThread = await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
+      await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
 
       const replyComment = {
-        content : 'this is comment' };
-      const addReplyComment = await threadRepositoryPostgres.addReplyComment(comment, 'comment-1234', 'user-12345');
-
-      expect(addedCommentThread).toStrictEqual(new AddedCommentThread({
-        id: 'comment-1234',
-        content: 'this is comment',
-        owner: 'user-1234',
+        content : 'this is reply' };
+      const addReplyComment = await threadRepositoryPostgres.addReplyComment(replyComment, 'comment-1234', 'user-12345');
+      expect(addReplyComment).toHaveProperty('id');
+      expect(addReplyComment).toStrictEqual(new AddedCommentThread({
+        id: 'reply-1234',
+        content: 'this is reply',
+        owner: 'user-12345',
       }));
-
-      expect(addedCommentThread.id).toEqual('comment-1234');
-      expect(addedCommentThread.content).toEqual(comment.content);
-      expect(addedCommentThread.owner).toEqual('user-1234');
     });
   });
 
@@ -303,25 +296,20 @@ describe('ThreadRepository postgres', () => {
       const reply = {
         content: 'yes that is first comment',
       }
-      //
-      // const reply2 = {
-      //   content: 'yes that is second comment',
-      // }
 
       await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234', '1');
-
+      const created_at = new Date().getMinutes();
       await threadRepositoryPostgres.addReplyComment(reply, 'comment-12341', 'user-1235','1');
       // await threadRepositoryPostgres.addReplyComment(reply2, 'comment-12341', 'user-1234','2');
       const replies = await threadRepositoryPostgres.getRepliesByThread('thread-1234');
       expect(replies).toHaveLength(1);
-
       expect(replies[0].id).toEqual('reply-12341');
       expect(replies[0].content).toEqual(reply.content);
       expect(replies[0].username).toEqual('dicoding2');
-      //
-      // expect(replies[1].id).toEqual('reply-12342');
-      // expect(replies[1].content).toEqual(reply2.content);
-      // expect(replies[1].username).toEqual('dicoding');
+
+      expect(new Date(replies[0].date).getMinutes()).toBe(created_at);
+      expect(replies[0].comment_id).toEqual('comment-12341');
+      expect(replies[0].is_deleted).toEqual(false);
     });
   });
 
@@ -408,7 +396,7 @@ describe('ThreadRepository postgres', () => {
 
       expect(deletedReply.id).toEqual(deletedReply.id);
       expect(deletedReply.is_deleted).toBe(true);
-      expect(new Date(deletedReply.date).getMinutes()).toEqual(updated_at);
+      expect(new Date(deletedReply.date).getMinutes()).toBe(updated_at);
     });
   });
 });

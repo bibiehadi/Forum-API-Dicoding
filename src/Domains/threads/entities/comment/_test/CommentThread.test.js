@@ -1,4 +1,5 @@
 const CommentThread = require('../CommentThread');
+const ReplyThread = require("../ReplyThread");
 
 describe('a CommentThread entities', () => {
   it('should throw error when payload did not contain needed property', () => {
@@ -34,6 +35,35 @@ describe('a CommentThread entities', () => {
       username: 'user-1234',
       date: '2021-08-08T07:59:18.982Z',
       replies: [],
+    };
+
+    // Action
+    const commentThread = new CommentThread(payload);
+
+    // Assert
+    expect(commentThread.id).toEqual(payload.id);
+    expect(commentThread.content).toEqual(payload.content);
+    expect(commentThread.username).toEqual(payload.username);
+    expect(commentThread.date).toEqual(payload.date);
+    expect(commentThread.replies).toEqual(payload.replies);
+  });
+
+  it('should create commentThread object correctly and have replies', () => {
+    // Arrange
+    const payload = {
+      id: 'comment-1234',
+      content: 'comment thread',
+      username: 'user-1234',
+      date: '2021-08-08T07:59:18.982Z',
+      replies: [
+        new ReplyThread({
+            id: 'reply-123456',
+            content: 'first reply',
+            username: 'johndoe',
+            date: '2023-12-25T03:47:27.901Z',
+          }
+        )
+      ],
     };
 
     // Action
