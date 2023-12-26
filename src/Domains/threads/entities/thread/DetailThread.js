@@ -11,11 +11,11 @@ class DetailThread {
     this.body = body;
     this.date = date;
     this.username = username;
-    this.comments = comments;
+    this.comments = comments ?? [];
   }
 
   _verifyPayload({
-    id, title, body, date, username, comments,
+    id, title, body, date, username,
   }) {
     if (!id || !title || !body || !date || !username) {
       throw new Error('DETAIL_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');

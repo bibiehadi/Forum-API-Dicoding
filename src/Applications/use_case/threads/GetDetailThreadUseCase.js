@@ -1,4 +1,4 @@
-const CommentThread = require("../../../Domains/threads/entities/comment/CommentThread");
+const ReplyThread = require("../../../Domains/threads/entities/comment/ReplyThread");
 
 class GetDetailThreadUseCase {
   constructor({ threadRepository }) {
@@ -7,11 +7,11 @@ class GetDetailThreadUseCase {
 
   async execute(id) {
     const thread = await this._threadRepository.getThreadById(id);
-    const comments = await this._threadRepository.getCommentsByThread(thread.id);
-    const allReplies = await this._threadRepository.getRepliesByThread(thread.id);
+    const comments = await this._threadRepository.getCommentsByThread(id);
+    const allReplies = await this._threadRepository.getRepliesByThread(id);
     const commentsWithReplies = comments.map((comment) => {
       const replies = allReplies.filter((reply) => reply.comment_id === comment.id);
-      comment.replies = replies.map((reply) => new CommentThread(reply));
+      comment.replies = replies.map((reply) => new ReplyThread(reply));
       return comment;
     });
     // console.log(commentsWithReplies);

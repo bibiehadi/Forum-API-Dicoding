@@ -3,14 +3,14 @@ class CommentThread {
     this._verifyPayload(payload);
 
     const {
-      id, username, content, date, replies,
+      id, username, content, date, replies, is_deleted = false
     } = payload;
 
     this.id = id;
-    this.content = content;
+    this.content = (is_deleted) ? '**komentar telah dihapus**' : content;
     this.username = username;
     this.date = date;
-    this.replies = replies;
+    this.replies = replies ?? [];
   }
 
   _verifyPayload({

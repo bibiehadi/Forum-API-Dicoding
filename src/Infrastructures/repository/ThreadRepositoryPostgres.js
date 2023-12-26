@@ -68,12 +68,18 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getCommentsByThread(threadId) {
     const query = {
-      text: 'SELECT comments.id, comments.content, users.username, comments.created_at AS date FROM comments LEFT JOIN users ON comments.owner = users.id WHERE comments.thread_id = $1',
+      text: `SELECT comments.id, comments.content, users.username, comments.created_at AS date, comments.is_deleted 
+             FROM comments LEFT JOIN users ON comments.owner = users.id 
+             WHERE comments.thread_id = $1
+             ORDER BY comments.created_at ASC`,
       values: [threadId],
     };
 
     const result = await this._pool.query(query);
-    return result.rows;
+    const newRes = result.rows.map((comment) => {
+      return new CommentThread(comment);
+    })
+    return newRes;
   }
 
   async findCommentById(id) {
@@ -94,17 +100,16 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
     const result = await this._pool.query(query);
     if (!result.rowCount) throw new AuthorizationError('Anda tidak memiliki hak akses terhadap komentar ini');
-    return true;
   }
 
   async deleteComment(commentId, threadId) {
-    const deletedComment = '**komentar telah dihapus**';
+    const content = '**komentar telah dihapus**';
     const updated_at = new Date().toISOString();
     const query = {
-      text: `UPDATE comments SET is_deleted = true, content = $1, updated_at = $4 
-            WHERE thread_id = $2 AND id = $3 
-            RETURNING id, content, owner, is_deleted`,
-      values: [deletedComment, threadId, commentId, updated_at],
+      text: `UPDATE comments SET is_deleted = true, updated_at = $1
+            WHERE thread_id = $2 AND id = $3
+            RETURNING id, content, owner, is_deleted, updated_at AS date`,
+      values: [updated_at, threadId, commentId],
     };
 
     const result = await this._pool.query(query);
@@ -127,19 +132,9 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     return new AddedComment(result.rows[0]);
   }
 
-  async getRepliesByComment(commentId) {
-    const query = {
-      text: 'SELECT reply.id, reply.content, users.username, reply.created_at AS date FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.comment_id = $1',
-      values: [commentId],
-    };
-
-    const result = await this._pool.query(query);
-    return result.rows;
-  }
-
   async getRepliesByThread(threadId) {
     const query = {
-      text: `SELECT reply.id, reply.content, users.username, reply.created_at AS date, reply.comment_id 
+      text: `SELECT reply.id, reply.content, users.username, reply.created_at AS date, reply.comment_id, reply.is_deleted 
                 FROM comment_replies AS reply 
                 LEFT JOIN users ON reply.owner = users.id
                 LEFT JOIN comments ON reply.comment_id = comments.id
@@ -169,17 +164,15 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
     const result = await this._pool.query(query);
     if (!result.rowCount) throw new AuthorizationError('Anda tidak memiliki hak akses terhadap balasan komentar ini');
-    return true;
   }
 
   async deleteReply(replyId, commentId) {
-    const deletedComment = '**balasan telah dihapus**';
     const updated_at = new Date().toISOString();
     const query = {
-      text: `UPDATE comment_replies SET is_deleted = true, content = $1, updated_at = $4
+      text: `UPDATE comment_replies SET is_deleted = true, updated_at = $1
             WHERE comment_id = $2 AND id = $3
-            RETURNING id, content, owner, is_deleted`,
-      values: [deletedComment, commentId, replyId, updated_at],
+            RETURNING id, content, owner, is_deleted, updated_at AS date`,
+      values: [updated_at, commentId, replyId],
     };
 
     const result = await this._pool.query(query);

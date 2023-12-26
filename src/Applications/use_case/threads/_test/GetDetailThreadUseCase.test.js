@@ -67,5 +67,7 @@ describe('GetDetailThreadUseCase', () => {
     expect(detailThread).toStrictEqual(new DetailThread(mockDetailThread));
 
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
+    expect(mockThreadRepository.getCommentsByThread).toBeCalledWith(threadId);
+    expect(mockThreadRepository.getRepliesByThread).toBeCalledWith(threadId);
   });
 });

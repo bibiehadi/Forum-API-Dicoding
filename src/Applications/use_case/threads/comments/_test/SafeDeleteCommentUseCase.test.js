@@ -24,6 +24,9 @@ describe('SafeDeleteCommentUsecase', () => {
 
     const deleteComment = await safeDeleteCommentUseCase.execute(commentId, threadId, owner);
 
+    expect(mockThreadRepository.findThreadById).toBeCalledWith(threadId);
+    expect(mockThreadRepository.findCommentById).toBeCalledWith(commentId);
+    expect(mockThreadRepository.verifyCommentOwner).toBeCalledWith(commentId, owner);
     expect(mockThreadRepository.deleteComment).toBeCalledWith(commentId, threadId);
   });
 });

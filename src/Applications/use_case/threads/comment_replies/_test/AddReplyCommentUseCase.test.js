@@ -38,6 +38,8 @@ describe('AddReplyCommentUseCase', () => {
             owner,
         }));
 
+        expect(mockThreadRepository.findThreadById).toBeCalledWith(threadId);
+        expect(mockThreadRepository.findCommentById).toBeCalledWith(commentId);
         expect(mockThreadRepository.addReplyComment).toBeCalledWith(content, commentId, owner);
     });
 });
