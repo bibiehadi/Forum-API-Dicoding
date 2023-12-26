@@ -20,7 +20,6 @@ describe('a ReplyThread entities', () => {
             content: 'dicoding',
             username: {},
             date: 123,
-            replies: [],
         };
 
         // Action and Assert
@@ -34,7 +33,6 @@ describe('a ReplyThread entities', () => {
             content: 'reply comment',
             username: 'user-1234',
             date: '2021-08-08T07:59:18.982Z',
-            replies: [],
         };
 
         // Action
@@ -45,7 +43,6 @@ describe('a ReplyThread entities', () => {
         expect(replyThread.content).toEqual(payload.content);
         expect(replyThread.username).toEqual(payload.username);
         expect(replyThread.date).toEqual(payload.date);
-        expect(replyThread.replies).toEqual(payload.replies);
     });
 
     it('should create replyThread object correctly if is_deleted is true', () => {
@@ -55,7 +52,6 @@ describe('a ReplyThread entities', () => {
             content: 'reply comment',
             username: 'user-1234',
             date: '2021-08-08T07:59:18.982Z',
-            replies: [],
             is_deleted: true,
         };
 
@@ -67,6 +63,5 @@ describe('a ReplyThread entities', () => {
         expect(replyThread.content).toEqual('**balasan telah dihapus**');
         expect(replyThread.username).toEqual(payload.username);
         expect(replyThread.date).toEqual(payload.date);
-        expect(replyThread.replies).toEqual(payload.replies);
     });
 });

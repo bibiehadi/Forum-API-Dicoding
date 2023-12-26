@@ -4,6 +4,7 @@ const AddedThread = require('../../Domains/threads/entities/thread/AddedThread')
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 const DetailThread = require('../../Domains/threads/entities/thread/DetailThread');
 const CommentThread = require('../../Domains/threads/entities/comment/CommentThread');
+const ReplyThread = require('../../Domains/threads/entities/comment/ReplyThread');
 const AddedComment = require('../../Domains/threads/entities/comment/AddedCommentThread');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
@@ -76,10 +77,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     };
 
     const result = await this._pool.query(query);
-    const newRes = result.rows.map((comment) => {
-      return new CommentThread(comment);
-    })
-    return newRes;
+    return result.rows.map((comment) => new CommentThread(comment));
   }
 
   async findCommentById(id) {
@@ -134,7 +132,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getRepliesByThread(threadId) {
     const query = {
-      text: `SELECT reply.id, reply.content, users.username, reply.created_at AS date, reply.comment_id, reply.is_deleted 
+      text: `SELECT reply.id, reply.content, users.username, reply.created_at, comments.thread_id AS date, reply.comment_id, reply.is_deleted 
                 FROM comment_replies AS reply 
                 LEFT JOIN users ON reply.owner = users.id
                 LEFT JOIN comments ON reply.comment_id = comments.id
