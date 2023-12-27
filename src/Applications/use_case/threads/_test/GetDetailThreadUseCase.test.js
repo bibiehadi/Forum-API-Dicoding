@@ -61,13 +61,15 @@ describe('GetDetailThreadUseCase', () => {
         id: 'comment-12345',
         content: 'sebuah comment',
         username: 'dicoding',
-        date: '2023-12-25T03:47:27.778Z'
+        date: '2023-12-25T03:47:27.778Z',
+        replies: []
       }),
       new CommentThread({
         id: 'comment-12346',
         content: 'sebuah comment',
         username: 'dicoding2',
-        date: '2023-12-25T03:47:27.796Z'
+        date: '2023-12-25T03:47:27.796Z',
+        replies: []
       })
     ];
 

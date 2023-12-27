@@ -37,16 +37,21 @@ describe('ThreadRepository postgres', () => {
         title: addThread.title,
         owner: userId,
       }));
+      expect(addedThread.id).toStrictEqual(threadId);
+      expect(addedThread.title).toStrictEqual(addThread.title);
+      expect(addedThread.owner).toStrictEqual(userId);
     });
   });
 
-  describe('getThreadById function', () => {
+  describe('findThreadById function', () => {
     it('should throw NotFoundError when thread not found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
       return expect(threadRepositoryPostgres.findThreadById('thread-1234')).rejects.toThrowError(NotFoundError);
     });
+  });
 
+  describe('getThreadById function', () => {
     it('should throw NotFoundError when thread not found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
@@ -95,6 +100,10 @@ describe('ThreadRepository postgres', () => {
         content: 'this is comment',
         owner: 'user-1234',
       }));
+
+      expect(addedCommentThread.id).toStrictEqual('comment-1234');
+      expect(addedCommentThread.content).toStrictEqual(comment.content);
+      expect(addedCommentThread.owner).toStrictEqual('user-1234');
     });
   });
 
@@ -189,13 +198,17 @@ describe('ThreadRepository postgres', () => {
         content: 'this is comment'
       };
       await threadRepositoryPostgres.addComment(message, 'thread-1234', 'user-1234');
-      await threadRepositoryPostgres.findCommentById('comment-1234');
+      const comment = await threadRepositoryPostgres.findCommentById('comment-1234');
+      const date = new Date().getSeconds();
       await threadRepositoryPostgres.verifyCommentOwner('comment-1234', 'user-1234');
-      const updated_at = new Date().getMinutes();
       const deletedComment = await threadRepositoryPostgres.deleteComment('comment-1234', 'thread-1234');
+
+      // assert
       expect(deletedComment.id).toEqual('comment-1234');
-      expect(deletedComment.is_deleted).toBe(true);
-      expect(new Date(deletedComment.date).getMinutes()).toBe(updated_at);
+      expect(deletedComment.is_deleted).not.toEqual(comment.is_deleted);
+      expect(deletedComment.is_deleted).toEqual(true);
+      expect(new Date(deletedComment.date).getTime()).not.toBe(new Date(comment.date).getTime());
+      expect(new Date(deletedComment.date).getSeconds()).toEqual(date);
     });
 
     it('should update delete status comment correctly with wrong user', async () => {
@@ -265,6 +278,9 @@ describe('ThreadRepository postgres', () => {
         content: 'this is reply',
         owner: 'user-12345',
       }));
+      expect(addReplyComment.id).toStrictEqual('reply-1234');
+      expect(addReplyComment.content).toStrictEqual(replyComment.content);
+      expect(addReplyComment.owner).toStrictEqual('user-12345');
     });
   });
 
@@ -387,16 +403,18 @@ describe('ThreadRepository postgres', () => {
       const content = {
         content: 'this is comment reply'
       };
-      const reply = await threadRepositoryPostgres.addReplyComment(content, 'comment-1234', 'user-1235');
-      await threadRepositoryPostgres.findReplyById('reply-1234')
+      await threadRepositoryPostgres.addReplyComment(content, 'comment-1234', 'user-1235');
+      const replied = await threadRepositoryPostgres.findReplyById('reply-1234');
       await threadRepositoryPostgres.verifyReplyOwner('reply-1234', 'user-1235');
 
-      const updated_at = new Date().getMinutes();
-      const deletedReply = await threadRepositoryPostgres.deleteReply(reply.id, 'comment-1234');
+      const date = new Date().getSeconds();
+      const deletedReply = await threadRepositoryPostgres.deleteReply(replied.id, 'comment-1234');
 
       expect(deletedReply.id).toEqual(deletedReply.id);
-      expect(deletedReply.is_deleted).toBe(true);
-      expect(new Date(deletedReply.date).getMinutes()).toBe(updated_at);
+      expect(deletedReply.is_deleted).not.toBe(replied.is_deleted);
+      expect(deletedReply.is_deleted).toEqual(true);
+      expect(new Date(deletedReply.date).getTime()).not.toBe(new Date(replied.date).getTime());
+      expect(new Date(deletedReply.date).getSeconds()).toEqual(date);
     });
   });
 });

@@ -46,6 +46,7 @@ describe('a CommentThread entities', () => {
     expect(commentThread.username).toEqual(payload.username);
     expect(commentThread.date).toEqual(payload.date);
     expect(commentThread.replies).toEqual(payload.replies);
+    expect(commentThread.replies).toHaveLength(0);
   });
 
   it('should create commentThread object correctly and have replies', () => {
@@ -75,6 +76,7 @@ describe('a CommentThread entities', () => {
     expect(commentThread.username).toEqual(payload.username);
     expect(commentThread.date).toEqual(payload.date);
     expect(commentThread.replies).toEqual(payload.replies);
+    expect(commentThread.replies).toHaveLength(1);
   });
 
   it('should create commentThread object correctly if is_deleted is true', () => {
@@ -97,5 +99,6 @@ describe('a CommentThread entities', () => {
     expect(commentThread.username).toEqual(payload.username);
     expect(commentThread.date).toEqual(payload.date);
     expect(commentThread.replies).toEqual(payload.replies);
+    expect(commentThread.replies).toHaveLength(0);
   });
 });

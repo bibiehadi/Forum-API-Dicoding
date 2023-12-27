@@ -49,6 +49,7 @@ describe('a DetailThread entities', () => {
     expect(detailThread.date).toEqual(payload.date);
     expect(detailThread.username).toEqual(payload.username);
     expect(detailThread.comments).toEqual(payload.comments);
+    expect(detailThread.comments).toHaveLength(0);
   });
 
   it('should create detailThread object correctly and have comments', () => {
@@ -87,5 +88,6 @@ describe('a DetailThread entities', () => {
     expect(detailThread.date).toEqual(payload.date);
     expect(detailThread.username).toEqual(payload.username);
     expect(detailThread.comments).toEqual(payload.comments);
+    expect(detailThread.comments).toHaveLength(2);
   });
 });

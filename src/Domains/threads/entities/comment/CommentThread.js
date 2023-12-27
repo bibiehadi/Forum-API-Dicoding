@@ -14,7 +14,7 @@ class CommentThread {
   }
 
   _verifyPayload({
-    id, content, username, date, replies,
+    id, content, username, date,
   }) {
     if (!id || !content || !username || !date) {
       throw new Error('COMMENT_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
