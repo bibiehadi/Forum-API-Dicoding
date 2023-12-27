@@ -29,17 +29,18 @@ describe('ThreadRepository postgres', () => {
         title: 'dicoding',
         body: 'dicoding body thread',
       });
-
+      const created_at = new Date().getMinutes();
       const addedThread = await threadRepositoryPostgres.addThread(addThread, userId);
-      expect(addedThread).toHaveProperty('id');
-      expect(addedThread).toStrictEqual(new AddedThread({
-        id: threadId,
-        title: addThread.title,
-        owner: userId,
-      }));
-      expect(addedThread.id).toStrictEqual(threadId);
-      expect(addedThread.title).toStrictEqual(addThread.title);
-      expect(addedThread.owner).toStrictEqual(userId);
+      const thread = await threadRepositoryPostgres.getThreadById(addedThread.id);
+
+      //assert
+      expect(thread).toHaveProperty('id');
+      expect(thread.id).toStrictEqual(threadId);
+      expect(thread.title).toStrictEqual(addThread.title);
+      expect(thread.body).toStrictEqual(addThread.body);
+      expect(thread.username).toStrictEqual('dicoding');
+      expect(new Date(thread.date).getMinutes()).toStrictEqual(created_at);
+      expect(thread.comments).toStrictEqual([]);
     });
   });
 
@@ -93,17 +94,16 @@ describe('ThreadRepository postgres', () => {
 
       const comment = {
         content : 'this is comment' };
+      const created_at = new Date().getMinutes();
       const addedCommentThread = await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
-      expect(addedCommentThread).toHaveProperty('id')
-      expect(addedCommentThread).toStrictEqual(new AddedCommentThread({
-        id: 'comment-1234',
-        content: 'this is comment',
-        owner: 'user-1234',
-      }));
+      const commentThread = await threadRepositoryPostgres.findCommentById(addedCommentThread.id);
+      expect(commentThread).toHaveProperty('id');
 
-      expect(addedCommentThread.id).toStrictEqual('comment-1234');
-      expect(addedCommentThread.content).toStrictEqual(comment.content);
-      expect(addedCommentThread.owner).toStrictEqual('user-1234');
+      expect(commentThread.id).toStrictEqual('comment-1234');
+      expect(commentThread.content).toStrictEqual(comment.content);
+      expect(commentThread.username).toStrictEqual('dicoding');
+      expect(commentThread.is_deleted).toStrictEqual(false);
+      expect(new Date(commentThread.date).getMinutes()).toStrictEqual(created_at);
     });
   });
 
@@ -198,17 +198,14 @@ describe('ThreadRepository postgres', () => {
         content: 'this is comment'
       };
       await threadRepositoryPostgres.addComment(message, 'thread-1234', 'user-1234');
-      const comment = await threadRepositoryPostgres.findCommentById('comment-1234');
-      const date = new Date().getSeconds();
       await threadRepositoryPostgres.verifyCommentOwner('comment-1234', 'user-1234');
-      const deletedComment = await threadRepositoryPostgres.deleteComment('comment-1234', 'thread-1234');
-
+      const date = new Date().getMinutes();
+      await threadRepositoryPostgres.deleteComment('comment-1234', 'thread-1234');
+      const comment = await threadRepositoryPostgres.findCommentById('comment-1234');
       // assert
-      expect(deletedComment.id).toEqual('comment-1234');
-      expect(deletedComment.is_deleted).not.toEqual(comment.is_deleted);
-      expect(deletedComment.is_deleted).toEqual(true);
-      expect(new Date(deletedComment.date).getTime()).not.toBe(new Date(comment.date).getTime());
-      expect(new Date(deletedComment.date).getSeconds()).toEqual(date);
+      expect(comment.id).toEqual('comment-1234');
+      expect(comment.is_deleted).toEqual(true);
+      expect(new Date(comment.date).getMinutes()).toEqual(date);
     });
 
     it('should update delete status comment correctly with wrong user', async () => {
@@ -271,16 +268,18 @@ describe('ThreadRepository postgres', () => {
 
       const replyComment = {
         content : 'this is reply' };
+
+      const created_at = new Date().getMinutes();
       const addReplyComment = await threadRepositoryPostgres.addReplyComment(replyComment, 'comment-1234', 'user-12345');
-      expect(addReplyComment).toHaveProperty('id');
-      expect(addReplyComment).toStrictEqual(new AddedCommentThread({
-        id: 'reply-1234',
-        content: 'this is reply',
-        owner: 'user-12345',
-      }));
-      expect(addReplyComment.id).toStrictEqual('reply-1234');
-      expect(addReplyComment.content).toStrictEqual(replyComment.content);
-      expect(addReplyComment.owner).toStrictEqual('user-12345');
+      const reply = await threadRepositoryPostgres.findReplyById(addReplyComment.id);
+
+      //asert
+      expect(reply).toHaveProperty('id');
+      expect(reply.id).toStrictEqual('reply-1234');
+      expect(reply.content).toStrictEqual(replyComment.content);
+      expect(reply.username).toStrictEqual('dicoding2');
+      expect(reply.is_deleted).toStrictEqual(false);
+      expect(new Date(reply.date).getMinutes()).toStrictEqual(created_at);
     });
   });
 
