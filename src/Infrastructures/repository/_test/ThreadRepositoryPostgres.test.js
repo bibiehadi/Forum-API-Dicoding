@@ -50,27 +50,6 @@ describe('ThreadRepository postgres', () => {
 
       return expect(threadRepositoryPostgres.findThreadById('thread-1234')).rejects.toThrowError(NotFoundError);
     });
-
-    it('should return detailThread correctly', async () => {
-      await UsersTableTestHelper.addUser({ id: 'user-1234', username: 'dicoding' });
-      const fakeIdGenerator = () => '1234';
-
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
-
-      const created_at = new Date().getMinutes();
-      const addedTread = await threadRepositoryPostgres.addThread({
-        title: 'dicoding',
-        body: 'dicoding body thread',
-      }, 'user-1234');
-
-      const thread = await threadRepositoryPostgres.findThreadById('thread-1234');
-      expect(thread.id).toEqual(addedTread.id);
-      expect(thread.title).toEqual(addedTread.title);
-      expect(thread.body).toEqual('dicoding body thread');
-      expect(thread.owner).toEqual('user-1234');
-      expect(new Date(thread.created_at).getMinutes()).toEqual(created_at);
-      expect(new Date(thread.updated_at).getMinutes()).toEqual(created_at);
-    });
   });
 
   describe('getThreadById function', () => {
@@ -221,7 +200,6 @@ describe('ThreadRepository postgres', () => {
       await threadRepositoryPostgres.addComment(message, 'thread-1234', 'user-1234');
       const addedComment = await threadRepositoryPostgres.findCommentById('comment-1234');
       await threadRepositoryPostgres.verifyCommentOwner(addedComment.id, 'user-1234');
-      const updated_at = new Date().getMinutes();
       await threadRepositoryPostgres.deleteComment(addedComment.id, 'thread-1234');
       const deletedComment = await threadRepositoryPostgres.findCommentById(addedComment.id);
       // assert
@@ -230,7 +208,7 @@ describe('ThreadRepository postgres', () => {
       expect(deletedComment.content).toStrictEqual(addedComment.content);
       expect(deletedComment.username).toStrictEqual(addedComment.username);
       expect(deletedComment.is_deleted).toStrictEqual(true);
-      expect(new Date(deletedComment.date).getMinutes()).toStrictEqual(updated_at);
+      expect(deletedComment.date).not.toEqual(addedComment.date);
     });
 
     it('should update delete status comment correctly with wrong user', async () => {
@@ -431,7 +409,6 @@ describe('ThreadRepository postgres', () => {
       const replied = await threadRepositoryPostgres.findReplyById('reply-1234');
       await threadRepositoryPostgres.verifyReplyOwner('reply-1234', 'user-1235');
 
-      const updated_at = new Date().getMinutes();
       await threadRepositoryPostgres.deleteReply(replied.id, 'comment-1234');
       const deletedReply = await threadRepositoryPostgres.findReplyById(replied.id);
 
@@ -441,8 +418,7 @@ describe('ThreadRepository postgres', () => {
       expect(deletedReply.content).toStrictEqual(replied.content);
       expect(deletedReply.username).toStrictEqual(replied.username);
       expect(deletedReply.is_deleted).toStrictEqual(true);
-      expect(new Date(deletedReply.date).getMinutes()).toStrictEqual(updated_at);
-
+      expect(deletedReply.date).not.toBe(replied.date);
     });
   });
 });

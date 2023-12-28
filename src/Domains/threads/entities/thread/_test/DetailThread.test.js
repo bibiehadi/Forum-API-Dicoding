@@ -28,6 +28,29 @@ describe('a DetailThread entities', () => {
     expect(() => new DetailThread(payload)).toThrowError('DETAIL_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 
+  it('should create detailThread object correctly and comments is undifined', () => {
+    // Arrange
+    const payload = {
+      id: 'thread-1234',
+      title: 'dicoding thread',
+      body: 'sebuah thread dicoding',
+      date: '2023-12-12T07:20:20.213Z',
+      username: 'dicoding',
+    };
+
+    // Action
+    const detailThread = new DetailThread(payload);
+
+    // Assert
+    expect(detailThread.id).toEqual(payload.id);
+    expect(detailThread.title).toEqual(payload.title);
+    expect(detailThread.body).toEqual(payload.body);
+    expect(detailThread.date).toEqual(payload.date);
+    expect(detailThread.username).toEqual(payload.username);
+    expect(detailThread.comments).toEqual([]);
+    expect(detailThread.comments).toHaveLength(0);
+  });
+
   it('should create detailThread object correctly', () => {
     // Arrange
     const payload = {

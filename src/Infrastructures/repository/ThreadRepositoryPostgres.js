@@ -36,7 +36,6 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
     const result = await this._pool.query(query);
     if (!result.rowCount) throw new NotFoundError('Thread tidak dapat ditemukan');
-    return result.rows[0];
   }
 
   async getThreadById(id) {
@@ -81,7 +80,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async findCommentById(id) {
     const query = {
-      text: 'SELECT comments.id, comments.content, users.username, comments.created_at AS date, comments.is_deleted FROM comments LEFT JOIN users ON comments.owner = users.id WHERE comments.id = $1',
+      text: 'SELECT comments.id, comments.content, users.username, comments.updated_at AS date, comments.is_deleted FROM comments LEFT JOIN users ON comments.owner = users.id WHERE comments.id = $1',
       values: [id],
     };
 
@@ -146,7 +145,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async findReplyById(id) {
     const query = {
-      text: 'SELECT reply.id, reply.content, users.username, reply.created_at AS date, reply.is_deleted FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.id = $1',
+      text: 'SELECT reply.id, reply.content, users.username, reply.updated_at AS date , reply.is_deleted FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.id = $1',
       values: [id],
     };
 
