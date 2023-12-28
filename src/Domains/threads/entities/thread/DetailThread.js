@@ -11,17 +11,18 @@ class DetailThread {
     this.body = body;
     this.date = date;
     this.username = username;
-    this.comments = comments ?? [];
+    this.comments = (comments === undefined ) ? [] : comments;
   }
 
   _verifyPayload({
-    id, title, body, date, username,
+    id, title, body, date, username, comments
   }) {
+    comments = (comments === undefined ) ? [] : comments
     if (!id || !title || !body || !date || !username) {
       throw new Error('DETAIL_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 
-    if (typeof id !== 'string' || typeof title !== 'string' || typeof body !== 'string' || typeof date !== 'string' || typeof username !== 'string') {
+    if (typeof id !== 'string' || typeof title !== 'string' || typeof body !== 'string' || typeof date !== 'string' || typeof username !== 'string' || typeof comments !== 'object') {
       throw new Error('DETAIL_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }

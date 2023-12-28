@@ -10,17 +10,18 @@ class CommentThread {
     this.content = (is_deleted) ? '**komentar telah dihapus**' : content;
     this.username = username;
     this.date = date;
-    this.replies = replies ?? [];
+    this.replies = (replies === undefined ) ? [] : replies;
   }
 
   _verifyPayload({
-    id, content, username, date,
+    id, content, username, date, replies
   }) {
+    replies = (replies === undefined ) ? [] : replies
     if (!id || !content || !username || !date) {
       throw new Error('COMMENT_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 
-    if (typeof id !== 'string' || typeof content !== 'string' || typeof username !== 'string' || typeof date !== 'string') {
+    if (typeof id !== 'string' || typeof content !== 'string' || typeof username !== 'string' || typeof date !== 'string' || typeof replies !== 'object') {
       throw new Error('COMMENT_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }

@@ -16,10 +16,10 @@ describe('a DetailThread entities', () => {
   it('should throw error when payload did not meet data type specification', () => {
     // Arrange
     const payload = {
-      id: {},
+      id: 'asdsa',
       title: 'dicoding thread',
       body: 'sebuah thread dicoding',
-      date: 1231481,
+      date: '1231481',
       username: 'dicoding',
       comments: 'asdask',
     };
