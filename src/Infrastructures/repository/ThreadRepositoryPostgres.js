@@ -20,12 +20,12 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
     const createdAt = new Date().toISOString();
     const query = {
-      text: 'INSERT INTO threads VALUES ($1, $2, $3, $4, $5, $5) RETURNING id, title, owner, created_at',
+      text: 'INSERT INTO threads VALUES ($1, $2, $3, $4, $5, $5) RETURNING id, title, owner',
       values: [id, title, body, userId, createdAt],
     };
 
     const result = await this._pool.query(query);
-    return new AddedThread(result.rows[0]);
+    return result.rows[0];
   }
 
   async findThreadById(id) {
@@ -46,7 +46,8 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
     const result = await this._pool.query(query);
     if (result.rows.length > 0) {
-      return new DetailThread({ ...result.rows[0] });
+      // return new DetailThread({ ...result.rows[0] });
+      return result.rows[0];
     }
 
     throw new NotFoundError('Thread tidak dapat ditemukan');
@@ -90,7 +91,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getCommentById(id) {
     const query = {
-      text: 'SELECT comments.id, comments.content, users.username, comments.updated_at AS date, comments.is_deleted FROM comments LEFT JOIN users ON comments.owner = users.id WHERE comments.id = $1',
+      text: 'SELECT comments.id, comments.content, users.username, comments.created_at, comments.updated_at, comments.is_deleted FROM comments LEFT JOIN users ON comments.owner = users.id WHERE comments.id = $1',
       values: [id],
     };
 
@@ -110,7 +111,6 @@ class ThreadRepositoryPostgres extends ThreadRepository {
   }
 
   async deleteComment(commentId, threadId) {
-    const content = '**komentar telah dihapus**';
     const updated_at = new Date().toISOString();
     const query = {
       text: `UPDATE comments SET is_deleted = true, updated_at = $1
@@ -155,17 +155,17 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async findReplyById(id) {
     const query = {
-      text: 'SELECT reply.id, reply.content, users.username, reply.updated_at AS date , reply.is_deleted FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.id = $1',
+      text: 'SELECT * FROM comment_replies AS reply WHERE reply.id = $1',
       values: [id],
     };
 
     const result = await this._pool.query(query);
-    if (!result.rowCount) throw new NotFoundError('Balasan komentar tidak dapat ditemukan');
+    if (!result.rowCount) throw new NotFoundError('Balasan reply tidak dapat ditemukan');
   }
 
   async getReplyById(id) {
     const query = {
-      text: 'SELECT reply.id, reply.content, users.username, reply.updated_at AS date , reply.is_deleted FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.id = $1',
+      text: 'SELECT reply.id, reply.content, users.username,reply.created_at, reply.updated_at, reply.is_deleted, reply.comment_id FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.id = $1',
       values: [id],
     };
 

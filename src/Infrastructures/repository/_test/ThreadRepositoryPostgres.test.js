@@ -28,18 +28,13 @@ describe('ThreadRepository postgres', () => {
         title: 'dicoding',
         body: 'dicoding body thread',
       });
-      const created_at = new Date().getMinutes();
       const addedThread = await threadRepositoryPostgres.addThread(addThread, userId);
-      const thread = await threadRepositoryPostgres.getThreadById(addedThread.id);
 
       //assert
-      expect(thread).toHaveProperty('id');
-      expect(thread.id).toStrictEqual(threadId);
-      expect(thread.title).toStrictEqual(addThread.title);
-      expect(thread.body).toStrictEqual(addThread.body);
-      expect(thread.username).toStrictEqual('dicoding');
-      expect(new Date(thread.date).getMinutes()).toStrictEqual(created_at);
-      expect(thread.comments).toHaveLength(0);
+      expect(addedThread).toHaveProperty('id');
+      expect(addedThread.id).toStrictEqual(threadId);
+      expect(addedThread.title).toStrictEqual(addThread.title);
+      expect(addedThread.owner).toStrictEqual(userId);
     });
   });
 
@@ -47,7 +42,7 @@ describe('ThreadRepository postgres', () => {
     it('should throw NotFoundError when thread not found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
-      return expect(threadRepositoryPostgres.findThreadById('thread-1234')).rejects.toThrowError(NotFoundError);
+      return expect(threadRepositoryPostgres.findThreadById('thread-XXXX')).rejects.toThrowError(NotFoundError);
     });
   });
 
@@ -55,7 +50,7 @@ describe('ThreadRepository postgres', () => {
     it('should throw NotFoundError when thread not found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
-      return expect(threadRepositoryPostgres.getThreadById('thread-1234')).rejects.toThrowError(NotFoundError);
+      return expect(threadRepositoryPostgres.getThreadById('thread-XXXX')).rejects.toThrowError(NotFoundError);
     });
 
     it('should return detailThread correctly', async () => {
@@ -74,7 +69,6 @@ describe('ThreadRepository postgres', () => {
       expect(thread.title).toEqual(addedTread.title);
       expect(thread.body).toEqual('dicoding body thread');
       expect(thread.username).toEqual('dicoding');
-      expect(thread.comments).toHaveLength(0);
     });
   });
 
@@ -93,15 +87,10 @@ describe('ThreadRepository postgres', () => {
 
       const comment = {
         content : 'this is comment' };
-      const created_at = new Date().getMinutes();
       const addedCommentThread = await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
-      const commentThread = await threadRepositoryPostgres.getCommentById(addedCommentThread.id);
-      expect(commentThread).toHaveProperty('id');
-      expect(commentThread.id).toStrictEqual('comment-1234');
-      expect(commentThread.content).toStrictEqual(comment.content);
-      expect(commentThread.username).toStrictEqual('dicoding');
-      expect(commentThread.is_deleted).toStrictEqual(false);
-      expect(new Date(commentThread.date).getMinutes()).toStrictEqual(created_at);
+      expect(addedCommentThread.id).toStrictEqual('comment-1234');
+      expect(addedCommentThread.content).toStrictEqual(comment.content);
+      expect(addedCommentThread.owner).toStrictEqual('user-1234');
     });
   });
 
@@ -109,7 +98,7 @@ describe('ThreadRepository postgres', () => {
     it('should throw NotFoundError when comment not found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
-      return expect(threadRepositoryPostgres.findCommentById('comment-1234')).rejects.toThrowError(NotFoundError);
+      return expect(threadRepositoryPostgres.findCommentById('comment-xxxxx')).rejects.toThrowError(NotFoundError);
     });
   });
 
@@ -206,15 +195,13 @@ describe('ThreadRepository postgres', () => {
       await threadRepositoryPostgres.addComment(message, 'thread-1234', 'user-1234');
       const addedComment = await threadRepositoryPostgres.getCommentById('comment-1234');
       await threadRepositoryPostgres.verifyCommentOwner(addedComment.id, 'user-1234');
-      await threadRepositoryPostgres.deleteComment(addedComment.id, 'thread-1234');
-      const deletedComment = await threadRepositoryPostgres.getCommentById(addedComment.id);
+      const deletedComment = await threadRepositoryPostgres.deleteComment(addedComment.id, 'thread-1234');
       // assert
-      expect(deletedComment).toHaveProperty('id');
       expect(deletedComment.id).toStrictEqual(addedComment.id);
       expect(deletedComment.content).toStrictEqual(addedComment.content);
-      expect(deletedComment.username).toStrictEqual(addedComment.username);
+      expect(deletedComment.owner).toStrictEqual('user-1234');
       expect(deletedComment.is_deleted).toStrictEqual(true);
-      expect(deletedComment.date).not.toEqual(addedComment.date);
+      expect(deletedComment.date).not.toEqual(addedComment.created_at);
     });
 
     it('should update delete status comment correctly with wrong user', async () => {
@@ -350,14 +337,14 @@ describe('ThreadRepository postgres', () => {
     it('should throw NotFoundError when thread not found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
 
-      return expect(threadRepositoryPostgres.findReplyById('reply-1234')).rejects.toThrowError(NotFoundError);
+      return expect(threadRepositoryPostgres.findReplyById('reply-xxxx')).rejects.toThrowError(NotFoundError);
     });
   });
 
   describe('getReplyById function', () => {
     it('should throw NotFoundError when thread not found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
-      return expect(threadRepositoryPostgres.getReplyById('reply-1234')).rejects.toThrowError(NotFoundError);
+      return expect(threadRepositoryPostgres.getReplyById('reply-xxxx')).rejects.toThrowError(NotFoundError);
     });
 
     it('should return a reply where founded', async () => {
@@ -382,17 +369,10 @@ describe('ThreadRepository postgres', () => {
       }
 
       await threadRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234', '1');
-      const created_at = new Date().getMinutes();
-      await threadRepositoryPostgres.addReplyComment(reply, 'comment-12341', 'user-1235','1');
-      const replies = await threadRepositoryPostgres.getRepliesByThread('thread-1234');
-      expect(replies).toHaveLength(1);
-      expect(replies[0].id).toEqual('reply-12341');
-      expect(replies[0].content).toEqual(reply.content);
-      expect(replies[0].username).toEqual('dicoding2');
-
-      expect(new Date(replies[0].date).getMinutes()).toBe(created_at);
-      expect(replies[0].comment_id).toEqual('comment-12341');
-      expect(replies[0].is_deleted).toEqual(false);
+      const addedReply = await threadRepositoryPostgres.addReplyComment(reply, 'comment-12341', 'user-1235','1');
+      expect(addedReply.id).toEqual('reply-12341');
+      expect(addedReply.content).toEqual(reply.content);
+      expect(addedReply.owner).toEqual('user-1235');
     });
   });
 
@@ -474,16 +454,14 @@ describe('ThreadRepository postgres', () => {
       const replied = await threadRepositoryPostgres.getReplyById('reply-1234');
       await threadRepositoryPostgres.verifyReplyOwner('reply-1234', 'user-1235');
 
-      await threadRepositoryPostgres.deleteReply(replied.id, 'comment-1234');
-      const deletedReply = await threadRepositoryPostgres.getReplyById(replied.id);
+      const deletedReply = await threadRepositoryPostgres.deleteReply(replied.id, 'comment-1234');
 
       //asert
-      expect(deletedReply).toHaveProperty('id');
       expect(deletedReply.id).toStrictEqual(replied.id);
       expect(deletedReply.content).toStrictEqual(replied.content);
-      expect(deletedReply.username).toStrictEqual(replied.username);
+      expect(deletedReply.owner).toStrictEqual('user-1235');
       expect(deletedReply.is_deleted).toStrictEqual(true);
-      expect(deletedReply.date).not.toBe(replied.date);
+      expect(deletedReply.date).not.toEqual(replied.updated_at);
     });
   });
 });

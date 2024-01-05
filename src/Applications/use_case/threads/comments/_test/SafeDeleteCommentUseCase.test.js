@@ -12,7 +12,7 @@ describe('SafeDeleteCommentUsecase', () => {
     const mockedDeleteComment = {
       id: 'comment-1234',
       content: 'this is comment',
-      username: 'dicoding',
+      owner: 'user-1234',
       date: '2023-12-28T16:57:45.526Z',
       is_deleted: true
     };
