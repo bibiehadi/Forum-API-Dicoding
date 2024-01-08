@@ -22,16 +22,20 @@ describe('ThreadRepository postgres', () => {
 
       const fakeIdGenerator = () => '1234';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
-      const addThread = new AddThread({
+      const payload = new AddThread({
         title: 'dicoding',
         body: 'dicoding body thread',
       });
-      await threadRepositoryPostgres.addThread(addThread, userId);
+      const addThread = await threadRepositoryPostgres.addThread(payload, userId);
       const addedThread = await threadRepositoryPostgres.getThreadById(threadId);
       //assert
+      expect(addThread.id).toStrictEqual(threadId);
+      expect(addThread.title).toStrictEqual(payload.title);
+      expect(addThread.owner).toStrictEqual(userId);
+
       expect(addedThread.id).toStrictEqual(threadId);
-      expect(addedThread.title).toStrictEqual(addThread.title);
-      expect(addedThread.body).toStrictEqual(addThread.body);
+      expect(addedThread.title).toStrictEqual(payload.title);
+      expect(addedThread.body).toStrictEqual(payload.body);
       expect(new Date(addedThread.date).getMinutes()).toStrictEqual(new Date().getMinutes());
       expect(addedThread.username).toStrictEqual('dicoding');
     });
