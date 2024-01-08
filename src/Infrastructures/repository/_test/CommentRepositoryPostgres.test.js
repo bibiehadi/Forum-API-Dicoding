@@ -27,13 +27,21 @@ describe('CommentRepository postgres', () => {
                 body: 'dicoding body thread',
             });
 
-            await threadRepositoryPostgres.addThread(addThread, 'user-1234');
+            const addedThread = await threadRepositoryPostgres.addThread(addThread, 'user-1234');
 
             const comment = {
                 content : 'this is comment' };
-            await commentRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
+            const addComment = await commentRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
             const addedCommentThread = await commentRepositoryPostgres.getCommentById('comment-1234');
-            expect(addedCommentThread.id).toStrictEqual('comment-1234');
+
+            expect(addedThread.id).toStrictEqual('thread-1234');
+            expect(addedThread.title).toStrictEqual(addThread.title);
+            expect(addedThread.owner).toStrictEqual('user-1234');
+
+            expect(addComment.id).toStrictEqual('comment-1234');
+            expect(addComment.content).toStrictEqual(comment.content);
+            expect(addComment.owner).toStrictEqual('user-1234');
+
             expect(addedCommentThread.content).toStrictEqual(comment.content);
             expect(addedCommentThread.username).toStrictEqual('dicoding');
             expect(addedCommentThread.date).not.toBeNull();

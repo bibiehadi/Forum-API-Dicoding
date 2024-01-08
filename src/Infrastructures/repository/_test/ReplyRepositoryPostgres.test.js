@@ -37,7 +37,7 @@ describe('CommentRepository postgres', () => {
                 body: 'dicoding body thread',
             });
 
-            await threadRepositoryPostgres.addThread(addThread, 'user-1234');
+            const addedThread = await threadRepositoryPostgres.addThread(addThread, 'user-1234');
 
             const comment = {
                 content: 'this is comment'
@@ -47,11 +47,24 @@ describe('CommentRepository postgres', () => {
                 content: 'yes that is first comment',
             }
 
-            await commentRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234', '1');
+            const addComment = await commentRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234', '1');
             const created_at = new Date().getMinutes();
-            await replyRepositoryPostgres.addReplyComment(reply, 'comment-12341', 'user-1235','1');
+            const addReply = await replyRepositoryPostgres.addReplyComment(reply, 'comment-12341', 'user-1235','1');
             // await threadRepositoryPostgres.addReplyComment(reply2, 'comment-12341', 'user-1234','2');
             const replies = await replyRepositoryPostgres.getRepliesByThread('thread-1234');
+
+            expect(addedThread.id).toStrictEqual('thread-1234');
+            expect(addedThread.title).toStrictEqual(addThread.title);
+            expect(addedThread.owner).toStrictEqual('user-1234');
+
+            expect(addComment.id).toStrictEqual('comment-12341');
+            expect(addComment.content).toStrictEqual(comment.content);
+            expect(addComment.owner).toStrictEqual('user-1234');
+
+            expect(addReply.id).toStrictEqual('reply-12341');
+            expect(addReply.content).toStrictEqual(reply.content);
+            expect(addReply.owner).toStrictEqual('user-1235');
+
             expect(replies[0].id).toEqual('reply-12341');
             expect(replies[0].content).toEqual(reply.content);
             expect(replies[0].username).toEqual('dicoding2');
@@ -93,10 +106,20 @@ describe('CommentRepository postgres', () => {
                 content: 'yes that is first comment',
             }
 
-            await commentRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234', '1');
+            const addComment = await commentRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234', '1');
             const created_at = new Date().getMinutes();
-            await replyRepositoryPostgres.addReplyComment(reply, 'comment-12341', 'user-1235','1');
+            const addReply = await replyRepositoryPostgres.addReplyComment(reply, 'comment-12341', 'user-1235','1');
             const replies = await replyRepositoryPostgres.getRepliesByThread('thread-1234');
+
+            expect(addComment.id).toStrictEqual('comment-12341');
+            expect(addComment.content).toStrictEqual(comment.content);
+            expect(addComment.owner).toStrictEqual('user-1234');
+
+
+            expect(addReply.id).toStrictEqual('reply-12341');
+            expect(addReply.content).toStrictEqual(reply.content);
+            expect(addReply.owner).toStrictEqual('user-1235');
+
             expect(replies[0].id).toEqual('reply-12341');
             expect(replies[0].content).toEqual(reply.content);
             expect(replies[0].username).toEqual('dicoding2');
