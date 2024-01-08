@@ -86,6 +86,7 @@ describe('ThreadRepository postgres', () => {
       expect(thread.title).toEqual(addedTread.title);
       expect(thread.body).toEqual('dicoding body thread');
       expect(thread.username).toEqual('dicoding');
+      expect(thread.comments).toEqual([]);
     });
   });
 });

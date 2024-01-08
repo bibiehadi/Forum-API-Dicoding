@@ -201,9 +201,15 @@ describe('CommentRepository postgres', () => {
                 content: 'this is comment'
             };
             await commentRepositoryPostgres.addComment(message, 'thread-1234', 'user-1234');
-            await commentRepositoryPostgres.deleteComment('comment-1234', 'thread-1234');
+            const deleteComment = await commentRepositoryPostgres.deleteComment('comment-1234', 'thread-1234');
             const deletedComment = await commentRepositoryPostgres.getCommentById('comment-1234');
             // assert
+            expect(deleteComment.id).toStrictEqual('comment-1234');
+            expect(deleteComment.content).toStrictEqual(message.content);
+            expect(deleteComment.owner).toStrictEqual('user-1234');
+            expect(deleteComment.is_deleted).toStrictEqual(true);
+            expect(deleteComment.date).not.toBeNull();
+
             expect(deletedComment.id).toStrictEqual('comment-1234');
             expect(deletedComment.content).toStrictEqual(message.content);
             expect(deletedComment.username).toStrictEqual('dicoding');
