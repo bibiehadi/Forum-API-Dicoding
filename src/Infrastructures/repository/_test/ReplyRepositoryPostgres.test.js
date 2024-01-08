@@ -296,10 +296,16 @@ describe('CommentRepository postgres', () => {
             await replyRepositoryPostgres.addReplyComment(content, 'comment-1234', 'user-1235');
             await replyRepositoryPostgres.verifyReplyOwner('reply-1234', 'user-1235');
 
-            await replyRepositoryPostgres.deleteReply('reply-1234', 'comment-1234');
+            const deleteReply = await replyRepositoryPostgres.deleteReply('reply-1234', 'comment-1234');
             const deletedReply = await replyRepositoryPostgres.getReplyById('reply-1234')
 
             //assert
+            expect(deleteReply.id).toStrictEqual('reply-1234');
+            expect(deleteReply.content).toStrictEqual(content.content);
+            expect(deleteReply.owner).toStrictEqual('user-1235');
+            expect(deleteReply.is_deleted).toStrictEqual(true);
+            expect(deleteReply.date).not.toBeNaN();
+
             expect(deletedReply.id).toStrictEqual('reply-1234');
             expect(deletedReply.content).toStrictEqual(content.content);
             expect(deletedReply.username).toStrictEqual('dicoding2');
