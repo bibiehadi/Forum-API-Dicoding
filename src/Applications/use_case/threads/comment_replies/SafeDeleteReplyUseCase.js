@@ -1,14 +1,16 @@
 class SafeDeleteReplyUseCase {
-    constructor({ threadRepository }) {
+    constructor({ threadRepository, commentRepository, replyRepository }) {
         this._threadRepository = threadRepository;
+        this._commentRepository = commentRepository;
+        this._replyRepository = replyRepository;
     }
 
     async execute(replyId, threadId, commentId, userId) {
         await this._threadRepository.findThreadById(threadId);
-        await this._threadRepository.findCommentById(commentId);
-        await this._threadRepository.findReplyById(replyId);
-        await this._threadRepository.verifyReplyOwner(replyId, userId);
-        return this._threadRepository.deleteReply(replyId, commentId);
+        await this._commentRepository.findCommentById(commentId);
+        await this._replyRepository.findReplyById(replyId);
+        await this._replyRepository.verifyReplyOwner(replyId, userId);
+        return this._replyRepository.deleteReply(replyId, commentId);
     }
 }
 

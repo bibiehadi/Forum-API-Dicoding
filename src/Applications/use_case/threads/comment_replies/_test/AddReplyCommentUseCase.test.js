@@ -1,5 +1,7 @@
 const AddedCommentThread = require('../../../../../Domains/threads/entities/comment/AddedCommentThread');
 const ThreadRepository = require('../../../../../Domains/threads/ThreadRepository');
+const CommentRepository = require('../../../../../Domains/threads/CommentRepository');
+const ReplyRepository = require('../../../../../Domains/threads/ReplyRepository');
 const AddReplyCommentUseCase = require('../AddReplyCommentUseCase');
 
 describe('AddReplyCommentUseCase', () => {
@@ -20,14 +22,18 @@ describe('AddReplyCommentUseCase', () => {
 
         //  create dependency
         const mockThreadRepository = new ThreadRepository();
+        const mockCommentRepository = new CommentRepository();
+        const mockReplyRepository = new ReplyRepository();
 
         //  mocking needed function
         mockThreadRepository.findThreadById = jest.fn().mockImplementation(() => Promise.resolve());
-        mockThreadRepository.findCommentById = jest.fn().mockImplementation(() => Promise.resolve());
-        mockThreadRepository.addReplyComment = jest.fn().mockImplementation(() => Promise.resolve(mockAddedReply));
+        mockCommentRepository.findCommentById = jest.fn().mockImplementation(() => Promise.resolve());
+        mockReplyRepository.addReplyComment = jest.fn().mockImplementation(() => Promise.resolve(mockAddedReply));
 
         const addRepyCommentUseCase = new AddReplyCommentUseCase({
             threadRepository: mockThreadRepository,
+            commentRepository: mockCommentRepository,
+            replyRepository: mockReplyRepository,
         });
 
         const addedReply = await addRepyCommentUseCase.execute(content,threadId, commentId, owner);
@@ -39,7 +45,7 @@ describe('AddReplyCommentUseCase', () => {
         }));
 
         expect(mockThreadRepository.findThreadById).toBeCalledWith(threadId);
-        expect(mockThreadRepository.findCommentById).toBeCalledWith(commentId);
-        expect(mockThreadRepository.addReplyComment).toBeCalledWith(content, commentId, owner);
+        expect(mockCommentRepository.findCommentById).toBeCalledWith(commentId);
+        expect(mockReplyRepository.addReplyComment).toBeCalledWith(content, commentId, owner);
     });
 });

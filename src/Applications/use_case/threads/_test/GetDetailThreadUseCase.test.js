@@ -2,6 +2,8 @@ const DetailThread = require('../../../../Domains/threads/entities/thread/Detail
 const CommentThread = require('../../../../Domains/threads/entities/comment/CommentThread');
 const ReplyThread = require('../../../../Domains/threads/entities/comment/ReplyThread');
 const ThreadRepository = require('../../../../Domains/threads/ThreadRepository');
+const CommentRepository = require('../../../../Domains/threads/CommentRepository');
+const ReplyRepository = require('../../../../Domains/threads/ReplyRepository');
 const GetDetailThreadUseCase = require('../GetDetailThreadUseCase');
 
 describe('GetDetailThreadUseCase', () => {
@@ -95,14 +97,18 @@ describe('GetDetailThreadUseCase', () => {
 
     //  create dependency
     const mockThreadRepository = new ThreadRepository();
+    const mockCommentRepository = new CommentRepository();
+    const mockReplyRepository = new ReplyRepository();
 
     // mocking needed function
     mockThreadRepository.getThreadById = jest.fn().mockImplementation(() => Promise.resolve(mockThread));
-    mockThreadRepository.getCommentsByThread = jest.fn().mockImplementation(() => Promise.resolve(mockCommentsThread));
-    mockThreadRepository.getRepliesByThread = jest.fn().mockImplementation(() => Promise.resolve(mockRepliesComment));
+    mockCommentRepository.getCommentsByThread = jest.fn().mockImplementation(() => Promise.resolve(mockCommentsThread));
+    mockReplyRepository.getRepliesByThread = jest.fn().mockImplementation(() => Promise.resolve(mockRepliesComment));
 
     const detailThreadUseCase = new GetDetailThreadUseCase({
       threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
+      replyRepository: mockReplyRepository,
     });
 
     // action
@@ -112,7 +118,7 @@ describe('GetDetailThreadUseCase', () => {
     expect(detailThread).toStrictEqual(resultDetailThread);
 
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
-    expect(mockThreadRepository.getCommentsByThread).toBeCalledWith(threadId);
-    expect(mockThreadRepository.getRepliesByThread).toBeCalledWith(threadId);
+    expect(mockCommentRepository.getCommentsByThread).toBeCalledWith(threadId);
+    expect(mockReplyRepository.getRepliesByThread).toBeCalledWith(threadId);
   });
 });

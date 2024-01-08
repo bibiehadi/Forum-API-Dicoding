@@ -1,4 +1,5 @@
 const ThreadRepository = require('../../../../../Domains/threads/ThreadRepository');
+const CommentRepository = require('../../../../../Domains/threads/CommentRepository');
 const SafeDeleteCommentUseCase = require('../SafeDeleteCommentUseCase');
 
 describe('SafeDeleteCommentUsecase', () => {
@@ -19,21 +20,23 @@ describe('SafeDeleteCommentUsecase', () => {
 
     //  create dependency
     const mockThreadRepository = new ThreadRepository();
+    const mockCommentRepository = new CommentRepository();
 
     //  mocking needed function
     mockThreadRepository.findThreadById = jest.fn().mockImplementation(() => Promise.resolve());
-    mockThreadRepository.findCommentById = jest.fn().mockImplementation(() => Promise.resolve());
-    mockThreadRepository.verifyCommentOwner = jest.fn().mockImplementation(() => Promise.resolve());
-    mockThreadRepository.deleteComment = jest.fn().mockImplementation(() => Promise.resolve(mockedDeleteComment));
+    mockCommentRepository.findCommentById = jest.fn().mockImplementation(() => Promise.resolve());
+    mockCommentRepository.verifyCommentOwner = jest.fn().mockImplementation(() => Promise.resolve());
+    mockCommentRepository.deleteComment = jest.fn().mockImplementation(() => Promise.resolve(mockedDeleteComment));
 
     const safeDeleteCommentUseCase = new SafeDeleteCommentUseCase({
       threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
     });
 
     const deleteComment = await safeDeleteCommentUseCase.execute(commentId, threadId, owner);
     expect(mockThreadRepository.findThreadById).toBeCalledWith(threadId);
-    expect(mockThreadRepository.findCommentById).toBeCalledWith(commentId);
-    expect(mockThreadRepository.verifyCommentOwner).toBeCalledWith(commentId, owner);
-    expect(mockThreadRepository.deleteComment).toBeCalledWith(commentId, threadId);
+    expect(mockCommentRepository.findCommentById).toBeCalledWith(commentId);
+    expect(mockCommentRepository.verifyCommentOwner).toBeCalledWith(commentId, owner);
+    expect(mockCommentRepository.deleteComment).toBeCalledWith(commentId, threadId);
   });
 });

@@ -1,6 +1,7 @@
 const ThreadRepository = require('../../../../../Domains/threads/ThreadRepository');
+const CommentRepository = require('../../../../../Domains/threads/CommentRepository');
+const ReplyRepository = require('../../../../../Domains/threads/ReplyRepository');
 const SafeDeleteReplyUseCase = require('../SafeDeleteReplyUseCase');
-const AddedCommentThread = require("../../../../../Domains/threads/entities/comment/AddedCommentThread");
 
 describe('SafeDeleteReplyUsecase', () => {
     it('should orchestrating the safe delete comment action correctly', async () => {
@@ -20,24 +21,28 @@ describe('SafeDeleteReplyUsecase', () => {
 
         //  create dependency
         const mockThreadRepository = new ThreadRepository();
+        const mockCommentRepository = new CommentRepository();
+        const mockReplyRepository = new ReplyRepository();
 
         //  mocking needed function
         mockThreadRepository.findThreadById = jest.fn().mockImplementation(() => Promise.resolve());
-        mockThreadRepository.findCommentById = jest.fn().mockImplementation(() => Promise.resolve());
-        mockThreadRepository.findReplyById = jest.fn().mockImplementation(() => Promise.resolve());
-        mockThreadRepository.verifyReplyOwner = jest.fn().mockImplementation(() => Promise.resolve());
-        mockThreadRepository.deleteReply = jest.fn().mockImplementation(() => Promise.resolve(mockedDeletedReply));
+        mockCommentRepository.findCommentById = jest.fn().mockImplementation(() => Promise.resolve());
+        mockReplyRepository.findReplyById = jest.fn().mockImplementation(() => Promise.resolve());
+        mockReplyRepository.verifyReplyOwner = jest.fn().mockImplementation(() => Promise.resolve());
+        mockReplyRepository.deleteReply = jest.fn().mockImplementation(() => Promise.resolve(mockedDeletedReply));
 
         const safeDeleteReplyUseCase = new SafeDeleteReplyUseCase({
             threadRepository: mockThreadRepository,
+            commentRepository: mockCommentRepository,
+            replyRepository: mockReplyRepository,
         });
 
         const deleteReply = await safeDeleteReplyUseCase.execute(replyId, threadId, commentId, owner);
 
         expect(mockThreadRepository.findThreadById).toBeCalledWith(threadId);
-        expect(mockThreadRepository.findCommentById).toBeCalledWith(commentId);
-        expect(mockThreadRepository.findReplyById).toBeCalledWith(replyId);
-        expect(mockThreadRepository.verifyReplyOwner).toBeCalledWith(replyId, owner);
-        expect(mockThreadRepository.deleteReply).toBeCalledWith(replyId, commentId);
+        expect(mockCommentRepository.findCommentById).toBeCalledWith(commentId);
+        expect(mockReplyRepository.findReplyById).toBeCalledWith(replyId);
+        expect(mockReplyRepository.verifyReplyOwner).toBeCalledWith(replyId, owner);
+        expect(mockReplyRepository.deleteReply).toBeCalledWith(replyId, commentId);
     });
 });
