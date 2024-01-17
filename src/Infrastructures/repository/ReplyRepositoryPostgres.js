@@ -11,9 +11,9 @@ class ReplyRepositoryPostgres extends ReplyRepository {
         this._idGenerator = idGenerator;
     }
 
-    async addReplyComment(addReply, commentId, owner, replyId = '') {
+    async addReplyComment(addReply, commentId, owner) {
         const { content } = addReply;
-        const id = `reply-${this._idGenerator()}${replyId}`;
+        const id = `reply-${this._idGenerator()}`;
         const createdAt = new Date().toISOString();
         const query = {
             text: `INSERT INTO COMMENT_REPLIES VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING id, content, owner`,
@@ -46,17 +46,6 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
         const result = await this._pool.query(query);
         if (!result.rowCount) throw new NotFoundError('Balasan reply tidak dapat ditemukan');
-    }
-
-    async getReplyById(id) {
-        const query = {
-            text: 'SELECT reply.id, reply.content, users.username, reply.updated_at AS date, reply.is_deleted, reply.comment_id FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.id = $1',
-            values: [id],
-        };
-
-        const result = await this._pool.query(query);
-        if (!result.rowCount) throw new NotFoundError('Balasan komentar tidak dapat ditemukan');
-        return result.rows[0];
     }
 
     async verifyReplyOwner(replyId, owner) {
