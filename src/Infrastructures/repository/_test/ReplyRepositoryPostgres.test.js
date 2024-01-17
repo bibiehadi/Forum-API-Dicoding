@@ -30,6 +30,7 @@ describe('CommentRepository postgres', () => {
     }
 
 
+
     describe('getRepliesComment function', () => {
         it('should return empty array when no comment are found in thread', async () => {
             const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
@@ -56,7 +57,6 @@ describe('CommentRepository postgres', () => {
             await ThreadsTableTestHelper.addComment(comment, 'thread-1234', 'user-1234', 'comment-1234');
             const created_at = new Date().getMinutes();
             await ThreadsTableTestHelper.addReplyComment(reply, 'comment-1234', 'user-1235','reply-1234');
-            // await ThreadsTableTestHelper.addReplyComment(reply2, 'comment-1234', 'user-1234','2');
             const replies = await replyRepositoryPostgres.getRepliesByThread('thread-1234');
 
             expect(replies[0].id).toEqual('reply-1234');
@@ -92,8 +92,8 @@ describe('CommentRepository postgres', () => {
 
             await ThreadsTableTestHelper.addComment(comment, 'thread-1234', 'user-1234', 'comment-1234');
             const created_at = new Date().getMinutes();
-            await ThreadsTableTestHelper.addReplyComment(reply, 'comment-1234', 'user-1235','reply-1234');
-            const addedReply = await ThreadsTableTestHelper.getReplyById('reply-1234');
+            await replyRepositoryPostgres.addReplyComment(reply, 'comment-1234', 'user-1235','reply-1234');
+            const addedReply = await ThreadsTableTestHelper.findReplyById('reply-1234');
 
             expect(addedReply.id).toEqual('reply-1234');
             expect(addedReply.content).toEqual(reply.content);
@@ -130,41 +130,6 @@ describe('CommentRepository postgres', () => {
             await ThreadsTableTestHelper.addComment(comment, 'thread-1234', 'user-1234', 'comment-1234');
             const addedReply = await replyRepositoryPostgres.addReplyComment(reply, 'comment-1234', 'user-1235','1');
             return expect(replyRepositoryPostgres.findReplyById(addedReply.id)).resolves.not.toThrowError(NotFoundError);
-        });
-    });
-
-    describe('getReplyById function', () => {
-        it('should throw NotFoundError when thread not found', async () => {
-            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
-            return expect(ThreadsTableTestHelper.getReplyById('reply-xxxx')).rejects.toThrowError(NotFoundError);
-        });
-
-        it('should return a reply where founded', async () => {
-            await UsersTableTestHelper.addUser(user1);
-            await UsersTableTestHelper.addUser(user2);
-            const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
-
-
-            await ThreadsTableTestHelper.addThread(addThread, 'user-1234');
-
-            const comment = {
-                content: 'this is comment'
-            };
-
-            const reply = {
-                content: 'yes that is first comment',
-            }
-
-            await ThreadsTableTestHelper.addComment(comment, 'thread-1234', 'user-1234', 'comment-1234');
-            await ThreadsTableTestHelper.addReplyComment(reply, 'comment-1234', 'user-1235','reply-1234');
-            const addedReply = await ThreadsTableTestHelper.getReplyById('reply-1234');
-            expect(addedReply.id).toEqual('reply-1234');
-            expect(addedReply.content).toEqual(reply.content);
-            expect(addedReply.username).toEqual('dicoding2');
-            expect(addedReply.is_deleted).toEqual(false);
-            expect(addedReply.comment_id).toEqual('comment-1234');
-            expect(addedReply.date).not.toBeNull();
-
         });
     });
 
@@ -218,8 +183,7 @@ describe('CommentRepository postgres', () => {
             await replyRepositoryPostgres.verifyReplyOwner('reply-1234', 'user-1235');
 
             const deleteReply = await replyRepositoryPostgres.deleteReply('reply-1234', 'comment-1234');
-            const deletedReply = await ThreadsTableTestHelper.getReplyById('reply-1234')
-
+            const deletedReply = await ThreadsTableTestHelper.findReplyById('reply-1234')
             //assert
             expect(deleteReply.id).toStrictEqual('reply-1234');
             expect(deleteReply.content).toStrictEqual(content.content);

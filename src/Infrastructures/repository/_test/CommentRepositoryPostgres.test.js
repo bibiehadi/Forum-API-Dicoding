@@ -31,7 +31,7 @@ describe('CommentRepository postgres', () => {
             const comment = {
                 content : 'this is comment' };
             const addComment = await commentRepositoryPostgres.addComment(comment, 'thread-1234', 'user-1234');
-            const addedCommentThread = await ThreadsTableTestHelper.getCommentById('comment-1234');
+            const addedCommentThread = await ThreadsTableTestHelper.findCommentById('comment-1234');
 
             expect(addComment.id).toStrictEqual('comment-1234');
             expect(addComment.content).toStrictEqual(comment.content);
@@ -121,40 +121,6 @@ describe('CommentRepository postgres', () => {
         });
     });
 
-    describe('getCommentById function', () => {
-        it('should return empty array when no comment are found in thread', async () => {
-            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-            return expect(ThreadsTableTestHelper.getCommentById('comment-1234')).rejects.toThrowError(NotFoundError);
-        });
-
-        it('should return list of comment when comments are found', async () => {
-            await UsersTableTestHelper.addUser({ id: 'user-1234', username: 'dicoding' });
-            await UsersTableTestHelper.addUser({ id: 'user-1235', username: 'dicoding2' });
-            const fakeIdGenerator = () => '1234';
-            const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-
-            const addThread = {
-                id: 'thread-1234',
-                title: 'dicoding',
-                body: 'dicoding body thread',
-            };
-
-            await ThreadsTableTestHelper.addThread(addThread, 'user-1234');
-
-            const content = {
-                content: 'this is comment'
-            };
-            const created_at = new Date().getMinutes();
-            const addedComment = await ThreadsTableTestHelper.addComment(content.content, 'thread-1234', 'user-1234', 'comment-1234');
-
-            const comment = await ThreadsTableTestHelper.getCommentById('comment-1234');
-            expect(comment.id).toEqual(addedComment.id);
-            expect(comment.content).toStrictEqual(addedComment.content);
-            expect(comment.username).toStrictEqual('dicoding');
-            expect(new Date(comment.date).getMinutes()).toStrictEqual(created_at);
-        });
-    });
-
     describe('verifyCommentOwner function', () => {
         it('should throw AuthorizationError when have not authorization about comment', async () => {
             const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
@@ -209,7 +175,7 @@ describe('CommentRepository postgres', () => {
             };
             await commentRepositoryPostgres.addComment(message, 'thread-1234', 'user-1234');
             const deleteComment = await commentRepositoryPostgres.deleteComment('comment-1234', 'thread-1234');
-            const deletedComment = await ThreadsTableTestHelper.getCommentById('comment-1234');
+            const deletedComment = await ThreadsTableTestHelper.findCommentById('comment-1234');
             // assert
 
             expect(deletedComment.id).toStrictEqual('comment-1234');

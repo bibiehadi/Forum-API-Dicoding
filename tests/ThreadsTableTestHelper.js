@@ -29,37 +29,35 @@ const ThreadsTableTestHelper = {
     return new AddedComment(result.rows[0]);
   },
 
-  async getCommentById(id) {
+  async findCommentById(id) {
     const query = {
       text: 'SELECT comments.id, comments.content, users.username, comments.updated_at as DATE, comments.is_deleted FROM comments LEFT JOIN users ON comments.owner = users.id WHERE comments.id = $1',
       values: [id],
     };
 
     const result = await pool.query(query);
-    if (!result.rowCount) throw new NotFoundError('Comment tidak dapat ditemukan');
     return result.rows[0];
   },
 
-  async addReplyComment(addReply, commentId, owner, replyId) {
+  async addReplyComment(addReply, commentId, owner, id) {
     const { content } = addReply;
     const createdAt = new Date().toISOString();
     const query = {
       text: `INSERT INTO comment_replies VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING id, content, owner`,
-      values: [replyId, content, owner, commentId, false, createdAt],
+      values: [id, content, owner, commentId, false, createdAt],
     };
 
     const result = await pool.query(query);
     return new AddedComment(result.rows[0]);
   },
 
-  async getReplyById(id) {
+  async findReplyById(id) {
     const query = {
       text: 'SELECT reply.id, reply.content, users.username, reply.updated_at AS date, reply.is_deleted, reply.comment_id FROM comment_replies AS reply LEFT JOIN users ON reply.owner = users.id WHERE reply.id = $1',
       values: [id],
     };
 
     const result = await pool.query(query);
-    if (!result.rowCount) throw new NotFoundError('Balasan komentar tidak dapat ditemukan');
     return result.rows[0];
   },
 
