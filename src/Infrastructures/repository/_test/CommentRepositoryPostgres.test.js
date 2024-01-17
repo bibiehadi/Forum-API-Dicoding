@@ -213,7 +213,7 @@ describe('CommentRepository postgres', () => {
             expect(deletedComment.id).toStrictEqual('comment-1234');
             expect(deletedComment.content).toStrictEqual(message.content);
             expect(deletedComment.username).toStrictEqual('dicoding');
-            expect(deletedComment.is_deleted).toStrictEqual(false);
+            expect(deletedComment.is_deleted).toStrictEqual(true);
             expect(deletedComment.date).not.toBeNull();
         });
 
