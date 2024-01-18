@@ -37,7 +37,7 @@ describe('SafeDeleteReplyUsecase', () => {
             replyRepository: mockReplyRepository,
         });
 
-        const deleteReply = await safeDeleteReplyUseCase.execute(replyId, threadId, commentId, owner);
+        await safeDeleteReplyUseCase.execute(replyId, threadId, commentId, owner);
 
         expect(mockThreadRepository.findThreadById).toBeCalledWith(threadId);
         expect(mockCommentRepository.findCommentById).toBeCalledWith(commentId);

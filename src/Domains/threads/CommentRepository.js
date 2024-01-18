@@ -11,6 +11,11 @@ class CommentRepository {
         throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
     }
 
+
+    async getCommentLikesByThreadId(threadId) {
+        throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+    }
+
     async verifyCommentOwner(commentId, owner) {
         throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
     }
