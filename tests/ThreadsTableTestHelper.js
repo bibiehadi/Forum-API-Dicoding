@@ -1,7 +1,6 @@
 const pool = require('../src/Infrastructures/database/postgres/pool');
 const AddedThread = require('../src/Domains/threads/entities/thread/AddedThread');
-const AddedComment = require("../src/Domains/threads/entities/comment/AddedCommentThread");
-const NotFoundError = require("../src/Commons/exceptions/NotFoundError");
+const AddedComment = require('../src/Domains/threads/entities/comment/AddedCommentThread');
 
 const ThreadsTableTestHelper = {
   async addThread({
@@ -43,7 +42,7 @@ const ThreadsTableTestHelper = {
     const { content } = addReply;
     const createdAt = new Date().toISOString();
     const query = {
-      text: `INSERT INTO comment_replies VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING id, content, owner`,
+      text: 'INSERT INTO comment_replies VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING id, content, owner',
       values: [id, content, owner, commentId, false, createdAt],
     };
 

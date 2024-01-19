@@ -3,7 +3,6 @@ const CommentThread = require('../../../../Domains/threads/entities/comment/Comm
 const ReplyThread = require('../../../../Domains/threads/entities/comment/ReplyThread');
 const ThreadRepository = require('../../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../../Domains/threads/CommentRepository');
-const CommentLikeRepository = require('../../../../Domains/threads/CommentLikeRepository');
 const ReplyRepository = require('../../../../Domains/threads/ReplyRepository');
 const GetDetailThreadUseCase = require('../GetDetailThreadUseCase');
 
@@ -19,7 +18,7 @@ describe('GetDetailThreadUseCase', () => {
       username: 'dicoding',
       comments: [
         new CommentThread(
-  {
+          {
             id: 'comment-12345',
             content: 'sebuah comment',
             username: 'dicoding',
@@ -37,7 +36,7 @@ describe('GetDetailThreadUseCase', () => {
                 content: '**balasan telah dihapus**',
                 username: 'johndoe',
                 date: '2023-12-25T03:47:27.901Z',
-              })
+              }),
             ],
           },
         ),
@@ -47,7 +46,7 @@ describe('GetDetailThreadUseCase', () => {
           username: 'dicoding2',
           date: '2023-12-25T03:47:27.796Z',
           likeCount: 0,
-          replies: []
+          replies: [],
         }),
       ],
 
@@ -68,7 +67,7 @@ describe('GetDetailThreadUseCase', () => {
         username: 'dicoding',
         date: '2023-12-25T03:47:27.778Z',
         likeCount: 2,
-        replies: []
+        replies: [],
       }),
       new CommentThread({
         id: 'comment-12346',
@@ -76,8 +75,8 @@ describe('GetDetailThreadUseCase', () => {
         username: 'dicoding2',
         date: '2023-12-25T03:47:27.796Z',
         likeCount: 0,
-        replies: []
-      })
+        replies: [],
+      }),
     ];
 
     const mockCommentLikes = [
@@ -91,7 +90,7 @@ describe('GetDetailThreadUseCase', () => {
         username: 'dicoding2',
         date: '2023-12-25T03:47:27.922Z',
         comment_id: 'comment-12345',
-        is_deleted: false
+        is_deleted: false,
       },
       {
         id: 'reply-123456',
@@ -99,15 +98,13 @@ describe('GetDetailThreadUseCase', () => {
         username: 'johndoe',
         date: '2023-12-25T03:47:27.901Z',
         comment_id: 'comment-12345',
-        is_deleted: true
-      }
-    ]
-
+        is_deleted: true,
+      },
+    ];
 
     //  create dependency
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
-    const mockCommentLikeRepository = new CommentLikeRepository();
     const mockReplyRepository = new ReplyRepository();
 
     // mocking needed function

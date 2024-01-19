@@ -256,7 +256,7 @@ container.register([
         {
           name: 'replyRepository',
           internal: ReplyRepository.name,
-        }
+        },
       ],
     },
   },
@@ -290,7 +290,7 @@ container.register([
         {
           name: 'commentRepository',
           internal: CommentRepository.name,
-        }
+        },
       ],
     },
   },
@@ -311,7 +311,7 @@ container.register([
         {
           name: 'commentLikeRepository',
           internal: CommentLikeRepository.name,
-        }
+        },
       ],
     },
   },
@@ -323,7 +323,7 @@ container.register([
       dependencies: [
         {
           name: 'threadRepository',
-          internal: ThreadRepository.name
+          internal: ThreadRepository.name,
         },
         {
           name: 'commentRepository',
@@ -332,7 +332,7 @@ container.register([
         {
           name: 'replyRepository',
           internal: ReplyRepository.name,
-        }
+        },
       ],
     },
   },
@@ -344,7 +344,7 @@ container.register([
       dependencies: [
         {
           name: 'threadRepository',
-          internal: ThreadRepository.name
+          internal: ThreadRepository.name,
         },
         {
           name: 'commentRepository',
@@ -353,7 +353,7 @@ container.register([
         {
           name: 'replyRepository',
           internal: ReplyRepository.name,
-        }
+        },
       ],
     },
   },

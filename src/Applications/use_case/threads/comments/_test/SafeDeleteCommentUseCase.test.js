@@ -4,8 +4,6 @@ const SafeDeleteCommentUseCase = require('../SafeDeleteCommentUseCase');
 
 describe('SafeDeleteCommentUsecase', () => {
   it('should orchestrating the safe delete comment action correctly', async () => {
-    const content = 'this is comment';
-
     const owner = 'user-1234';
     const threadId = 'thread-1234';
     const commentId = 'comment-1234';
@@ -15,7 +13,7 @@ describe('SafeDeleteCommentUsecase', () => {
       content: 'this is comment',
       owner: 'user-1234',
       date: '2023-12-28T16:57:45.526Z',
-      is_deleted: true
+      is_deleted: true,
     };
 
     //  create dependency
@@ -33,7 +31,7 @@ describe('SafeDeleteCommentUsecase', () => {
       commentRepository: mockCommentRepository,
     });
 
-    const deleteComment = await safeDeleteCommentUseCase.execute(commentId, threadId, owner);
+    await safeDeleteCommentUseCase.execute(commentId, threadId, owner);
     expect(mockThreadRepository.findThreadById).toBeCalledWith(threadId);
     expect(mockCommentRepository.findCommentById).toBeCalledWith(commentId);
     expect(mockCommentRepository.verifyCommentOwner).toBeCalledWith(commentId, owner);

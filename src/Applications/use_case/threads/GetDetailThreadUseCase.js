@@ -1,7 +1,9 @@
-const ReplyThread = require("../../../Domains/threads/entities/comment/ReplyThread");
+const ReplyThread = require('../../../Domains/threads/entities/comment/ReplyThread');
 
 class GetDetailThreadUseCase {
-  constructor({ threadRepository, commentRepository, commentLikeRepository, replyRepository }) {
+  constructor({
+    threadRepository, commentRepository, commentLikeRepository, replyRepository,
+  }) {
     this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
     this._commentLikeRepository = commentLikeRepository;

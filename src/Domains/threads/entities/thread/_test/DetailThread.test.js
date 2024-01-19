@@ -1,5 +1,5 @@
 const DetailThread = require('../DetailThread');
-const CommentThread = require("../../comment/CommentThread");
+const CommentThread = require('../../comment/CommentThread');
 
 describe('a DetailThread entities', () => {
   it('should throw error when payload did not contain needed property', () => {
@@ -90,7 +90,7 @@ describe('a DetailThread entities', () => {
           username: 'dicoding2',
           date: '2023-12-25T03:47:27.796Z',
           likes: 0,
-          replies: []
+          replies: [],
         }),
         new CommentThread({
           id: 'comment-12346',
@@ -98,7 +98,7 @@ describe('a DetailThread entities', () => {
           username: 'dicoding1',
           date: '2023-12-25T03:43:27.796Z',
           likes: 0,
-          replies: []
+          replies: [],
         }),
       ],
     };

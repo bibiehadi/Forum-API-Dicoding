@@ -6,7 +6,7 @@ const AddCommentThreadUsecase = require('../AddCommentThreadUseCase');
 describe('AddCommentThreadUsecase', () => {
   it('should orchestrating the add comment action correctly', async () => {
     const content = {
-      content : 'this is comment'
+      content: 'this is comment',
     };
 
     const owner = 'user-1234';
@@ -32,7 +32,6 @@ describe('AddCommentThreadUsecase', () => {
     });
 
     const addedComment = await addCommentUseCase.execute(content, threadId, owner);
-
 
     expect(addedComment).toStrictEqual(new AddedCommentThread({
       id: 'comment-1234',

@@ -1,5 +1,5 @@
 const CommentThread = require('../CommentThread');
-const ReplyThread = require("../ReplyThread");
+const ReplyThread = require('../ReplyThread');
 
 describe('a CommentThread entities', () => {
   it('should throw error when payload did not contain needed property', () => {
@@ -83,12 +83,11 @@ describe('a CommentThread entities', () => {
       date: '2021-08-08T07:59:18.982Z',
       replies: [
         new ReplyThread({
-            id: 'reply-123456',
-            content: 'first reply',
-            username: 'johndoe',
-            date: '2023-12-25T03:47:27.901Z',
-          }
-        )
+          id: 'reply-123456',
+          content: 'first reply',
+          username: 'johndoe',
+          date: '2023-12-25T03:47:27.901Z',
+        }),
       ],
     };
 

@@ -11,13 +11,13 @@ class DetailThread {
     this.body = body;
     this.date = date;
     this.username = username;
-    this.comments = (comments === undefined ) ? [] : comments;
+    this.comments = (comments === undefined) ? [] : comments;
   }
 
   _verifyPayload({
-    id, title, body, date, username, comments
+    id, title, body, date, username, comments,
   }) {
-    comments = (comments === undefined ) ? [] : comments
+    comments = (comments === undefined) ? [] : comments;
     if (!id || !title || !body || !date || !username) {
       throw new Error('DETAIL_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
     }

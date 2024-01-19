@@ -1,26 +1,26 @@
-const {type} = require("@hapi/hapi/lib/headers");
+const { type } = require('@hapi/hapi/lib/headers');
 
 class CommentThread {
   constructor(payload) {
     this._verifyPayload(payload);
 
     const {
-      id, username, content, date, likeCount, replies, is_deleted = false
+      id, username, content, date, likeCount, replies, isDelete = false,
     } = payload;
 
     this.id = id;
-    this.content = (is_deleted) ? '**komentar telah dihapus**' : content;
+    this.content = (isDelete) ? '**komentar telah dihapus**' : content;
     this.username = username;
     this.date = date;
     this.likeCount = (likeCount === undefined) ? 0 : likeCount;
-    this.replies = (replies === undefined ) ? [] : replies;
+    this.replies = (replies === undefined) ? [] : replies;
   }
 
   _verifyPayload({
-    id, content, username, date, likeCount, replies
+    id, content, username, date, likeCount, replies,
   }) {
-    replies = (replies === undefined ) ? [] : replies;
-    likeCount = (likeCount === undefined ) ? 0 : likeCount;
+    replies = (replies === undefined) ? [] : replies;
+    likeCount = (likeCount === undefined) ? 0 : likeCount;
     if (!id || !content || !username || !date) {
       throw new Error('COMMENT_THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
     }
