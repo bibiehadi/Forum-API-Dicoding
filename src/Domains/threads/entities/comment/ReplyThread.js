@@ -3,11 +3,11 @@ class ReplyThread {
     this._verifyPayload(payload);
 
     const {
-      id, username, content, date, isDeleted = false,
+      id, username, content, date, is_deleted = false,
     } = payload;
 
     this.id = id;
-    this.content = (isDeleted) ? '**balasan telah dihapus**' : content;
+    this.content = (is_deleted) ? '**balasan telah dihapus**' : content;
     this.username = username;
     this.date = date;
   }

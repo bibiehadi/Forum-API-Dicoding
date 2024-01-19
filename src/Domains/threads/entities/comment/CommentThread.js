@@ -5,11 +5,11 @@ class CommentThread {
     this._verifyPayload(payload);
 
     const {
-      id, username, content, date, likeCount, replies, isDelete = false,
+      id, username, content, date, likeCount, replies, is_deleted = false,
     } = payload;
 
     this.id = id;
-    this.content = (isDelete) ? '**komentar telah dihapus**' : content;
+    this.content = (is_deleted) ? '**komentar telah dihapus**' : content;
     this.username = username;
     this.date = date;
     this.likeCount = (likeCount === undefined) ? 0 : likeCount;

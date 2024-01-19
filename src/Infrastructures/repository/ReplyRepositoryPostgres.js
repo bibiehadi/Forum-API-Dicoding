@@ -59,12 +59,12 @@ class ReplyRepositoryPostgres extends ReplyRepository {
   }
 
   async deleteReply(replyId, commentId) {
-    const updatedAt = new Date().toISOString();
+    const updated_at = new Date().toISOString();
     const query = {
-      text: `UPDATE comment_replies SET is_deleted = true, updatedAt = $1
+      text: `UPDATE comment_replies SET is_deleted = true, updated_at = $1
             WHERE comment_id = $2 AND id = $3
-            RETURNING id, content, owner, is_deleted, updatedAt AS date`,
-      values: [updatedAt, commentId, replyId],
+            RETURNING id, content, owner, is_deleted, updated_at AS date`,
+      values: [updated_at, commentId, replyId],
     };
 
     const result = await this._pool.query(query);
