@@ -34,7 +34,9 @@ class CommentRepositoryPostgres extends CommentRepository {
         };
 
         const result = await this._pool.query(query);
-        return result.rows.map((comment) => new CommentThread(comment));
+        return result.rows.map((comment) => {
+            return new CommentThread(comment)
+        });
     }
 
     async findCommentById(id) {
@@ -45,6 +47,22 @@ class CommentRepositoryPostgres extends CommentRepository {
 
         const result = await this._pool.query(query);
         if (!result.rowCount) throw new NotFoundError('Comment tidak dapat ditemukan');
+    }
+
+    async getCommentLikesByThreadId(threadId) {
+        const query = {
+            text: `
+        SELECT comments.id, COUNT(comment_likes.id) AS likes
+        FROM comments 
+        LEFT JOIN comment_likes ON comments.id = comment_likes.comment_id
+        WHERE comments.thread_id = $1 
+        GROUP BY comments.id
+      `,
+            values: [threadId],
+        };
+
+        const result = await this._pool.query(query);
+        return result.rows;
     }
 
     async verifyCommentOwner(commentId, owner) {

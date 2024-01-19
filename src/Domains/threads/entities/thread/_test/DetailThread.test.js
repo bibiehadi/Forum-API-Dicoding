@@ -89,6 +89,7 @@ describe('a DetailThread entities', () => {
           content: 'sebuah comment',
           username: 'dicoding2',
           date: '2023-12-25T03:47:27.796Z',
+          likes: 0,
           replies: []
         }),
         new CommentThread({
@@ -96,6 +97,7 @@ describe('a DetailThread entities', () => {
           content: 'sebuah comment 2',
           username: 'dicoding1',
           date: '2023-12-25T03:43:27.796Z',
+          likes: 0,
           replies: []
         }),
       ],

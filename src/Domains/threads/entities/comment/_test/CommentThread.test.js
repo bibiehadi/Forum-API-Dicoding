@@ -20,6 +20,7 @@ describe('a CommentThread entities', () => {
       content: 'dicoding',
       username: {},
       date: 123,
+      likeCount: 0,
       replies: [],
     };
 
@@ -44,6 +45,7 @@ describe('a CommentThread entities', () => {
     expect(commentThread.content).toEqual(payload.content);
     expect(commentThread.username).toEqual(payload.username);
     expect(commentThread.date).toEqual(payload.date);
+    expect(commentThread.likeCount).toEqual(0);
     expect(commentThread.replies).toEqual([]);
     expect(commentThread.replies).toHaveLength(0);
   });
@@ -55,6 +57,7 @@ describe('a CommentThread entities', () => {
       content: 'comment thread',
       username: 'user-1234',
       date: '2021-08-08T07:59:18.982Z',
+      likeCount: 0,
       replies: [],
     };
 
@@ -66,6 +69,7 @@ describe('a CommentThread entities', () => {
     expect(commentThread.content).toEqual(payload.content);
     expect(commentThread.username).toEqual(payload.username);
     expect(commentThread.date).toEqual(payload.date);
+    expect(commentThread.likeCount).toEqual(0);
     expect(commentThread.replies).toEqual(payload.replies);
     expect(commentThread.replies).toHaveLength(0);
   });
@@ -96,6 +100,7 @@ describe('a CommentThread entities', () => {
     expect(commentThread.content).toEqual(payload.content);
     expect(commentThread.username).toEqual(payload.username);
     expect(commentThread.date).toEqual(payload.date);
+    expect(commentThread.likeCount).toEqual(0);
     expect(commentThread.replies).toEqual(payload.replies);
     expect(commentThread.replies).toHaveLength(1);
   });
@@ -107,6 +112,7 @@ describe('a CommentThread entities', () => {
       content: 'comment thread',
       username: 'user-1234',
       date: '2021-08-08T07:59:18.982Z',
+      likeCount: 0,
       replies: [],
       is_deleted: true,
     };
@@ -119,6 +125,7 @@ describe('a CommentThread entities', () => {
     expect(commentThread.content).toEqual('**komentar telah dihapus**');
     expect(commentThread.username).toEqual(payload.username);
     expect(commentThread.date).toEqual(payload.date);
+    expect(commentThread.likeCount).toEqual(0);
     expect(commentThread.replies).toEqual(payload.replies);
     expect(commentThread.replies).toHaveLength(0);
   });
