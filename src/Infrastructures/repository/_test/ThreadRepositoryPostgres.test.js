@@ -1,5 +1,4 @@
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
-const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 const pool = require('../../database/postgres/pool');
 const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
 const AddThread = require('../../../Domains/threads/entities/thread/AddThread');
@@ -66,7 +65,6 @@ describe('ThreadRepository postgres', () => {
   describe('getThreadById function', () => {
     it('should throw NotFoundError when thread not found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
-
       return expect(threadRepositoryPostgres.getThreadById('thread-XXXX')).rejects.toThrowError(NotFoundError);
     });
 

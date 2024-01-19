@@ -11,9 +11,9 @@ class CommentRepositoryPostgres extends CommentRepository {
         this._idGenerator = idGenerator;
     }
 
-    async addComment(addComment, threadId, owner, commentId = '') {
+    async addComment(addComment, threadId, owner) {
         const { content } = addComment;
-        const id = `comment-${this._idGenerator()}${commentId}`;
+        const id = `comment-${this._idGenerator()}`;
         const createdAt = new Date().toISOString();
         const query = {
             text: 'INSERT INTO COMMENTS VALUES ($1, $2, $3, $4, $5, $6, $6) RETURNING id, content, owner',
@@ -34,7 +34,9 @@ class CommentRepositoryPostgres extends CommentRepository {
         };
 
         const result = await this._pool.query(query);
-        return result.rows.map((comment) => new CommentThread(comment));
+        return result.rows.map((comment) => {
+            return new CommentThread(comment)
+        });
     }
 
     async findCommentById(id) {
@@ -47,15 +49,20 @@ class CommentRepositoryPostgres extends CommentRepository {
         if (!result.rowCount) throw new NotFoundError('Comment tidak dapat ditemukan');
     }
 
-    async getCommentById(id) {
+    async getCommentLikesByThreadId(threadId) {
         const query = {
-            text: 'SELECT comments.id, comments.content, users.username, comments.updated_at as DATE, comments.is_deleted FROM comments LEFT JOIN users ON comments.owner = users.id WHERE comments.id = $1',
-            values: [id],
+            text: `
+        SELECT comments.id, COUNT(comment_likes.id) AS likes
+        FROM comments 
+        LEFT JOIN comment_likes ON comments.id = comment_likes.comment_id
+        WHERE comments.thread_id = $1 
+        GROUP BY comments.id
+      `,
+            values: [threadId],
         };
 
         const result = await this._pool.query(query);
-        if (!result.rowCount) throw new NotFoundError('Comment tidak dapat ditemukan');
-        return result.rows[0];
+        return result.rows;
     }
 
     async verifyCommentOwner(commentId, owner) {
